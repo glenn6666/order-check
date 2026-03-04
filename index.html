@@ -3,87 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>客戶未取貨查詢系統</title>
+    <title>訂單金額查詢系統</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f7f6; }
-        h2 { color: #333; text-align: center; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .result-item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .item-name { font-weight: bold; color: #d9534f; }
-        .status-tag { display: inline-block; padding: 2px 8px; background: #eee; border-radius: 4px; font-size: 0.8em; margin-top: 5px; }
-        #loading { text-align: center; display: none; }
+        body { font-family: "Microsoft JhengHei", sans-serif; padding: 20px; max-width: 800px; margin: auto; background-color: #f8f9fa; }
+        h2 { color: #2c3e50; text-align: center; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 25px; }
+        input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px; }
+        button { padding: 12px 24px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        th { background-color: #f1f3f5; padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        
+        .total-section { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 8px; text-align: right; font-size: 1.2em; font-weight: bold; color: #d9534f; }
+        #loading { text-align: center; display: none; margin: 20px; }
+        .no-data { text-align: center; padding: 40px; color: #888; }
     </style>
 </head>
 <body>
 
-<h2>📦 訂單取貨查詢</h2>
+<h2>🛒 客戶待取貨明細查詢</h2>
 
 <div class="search-box">
-    <input type="text" id="nameInput" placeholder="請輸入您的暱稱 (例如: @阿勝)">
-    <button onclick="searchData()">查詢</button>
+    <input type="text" id="nameInput" placeholder="請輸入暱稱 (例如: @阿勝)">
+    <button onclick="searchData()">查詢金額</button>
 </div>
 
-<div id="loading">讀取中...</div>
-<div id="results"></div>
+<div id="loading">🔍 正在計算中，請稍候...</div>
+<div id="resultsContainer"></div>
 
 <script>
-    // 你的試算表設定
     const sheetId = '1pjTOojFm4-_rGpGGN9Nv31GCdYMPtSDQkfn8vbyBFLQ';
     const gid = '171915529';
-    // CSV 導出連結
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 
     async function searchData() {
-        const query = document.getElementById('nameInput').value.trim();
-        if (!query) return alert('請輸入暱稱！');
+        const query = document.getElementById('nameInput').value.trim().toLowerCase();
+        if (!query) return alert('請輸入您的暱稱！');
 
-        const resultDiv = document.getElementById('results');
+        const container = document.getElementById('resultsContainer');
         const loading = document.getElementById('loading');
         
-        resultDiv.innerHTML = '';
+        container.innerHTML = '';
         loading.style.display = 'block';
 
         try {
             const response = await fetch(csvUrl);
-            const data = await response.text();
-            const rows = data.split('\n').map(row => row.split(','));
+            const csvText = await response.text();
+            // 處理 CSV 換行與逗號 (考慮到備註可能含逗號，簡單切割)
+            const rows = csvText.split('\n').map(row => row.split(','));
 
-            // 假設欄位順序：狀態(0), 備註(1), 客戶暱稱(2), 商品名稱(3), 數量(4)...
-            // 根據你的圖片，客戶暱稱在第 C 欄 (Index 2)，商品在 D 欄 (Index 3)
-            // 狀態在 A 欄 (Index 0)
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>商品名稱</th>
+                            <th>數量</th>
+                            <th>單價</th>
+                            <th>小計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
             
+            let userTotal = 0;
             let found = false;
-            // 從第 2 行開始跑（跳過標題）
-            for (let i = 1; i < rows.length; i++) {
-                const status = rows[i][0] ? rows[i][0].trim() : "";
-                const customer = rows[i][2] ? rows[i][2].trim() : "";
-                const itemName = rows[i][3] ? rows[i][3].trim() : "";
-                const count = rows[i][4] ? rows[i][4].trim() : "";
 
-                // 判斷邏輯：名字相符 且 (狀態不是已勾選 或 你指定的未取貨關鍵字)
-                // 注意：CSV 導出時，勾選框通常會變成 TRUE/FALSE
-                if (customer.includes(query) && status !== "TRUE") {
-                    const div = document.createElement('div');
-                    div.className = 'result-item';
-                    div.innerHTML = `
-                        <div>客戶：${customer}</div>
-                        <div class="item-name">商品：${itemName} x ${count}</div>
-                        <div class="status-tag">狀態：尚未取貨</div>
+            // 根據你的圖片欄位索引：
+            // A:狀態(0), C:暱稱(2), D:商品(3), E:數量(4), F:金額(5), M:小計(12)
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.length < 5) continue;
+
+                const status = row[0] ? row[0].trim().toUpperCase() : "";
+                const customer = row[2] ? row[2].trim() : "";
+                const itemName = row[3] ? row[3].trim() : "";
+                const qty = row[4] ? row[4].trim() : "0";
+                const price = row[5] ? row[5].replace(/[^0-9]/g, '') : "0"; // 移除 $ 符號
+                const subtotal = row[12] ? row[12].replace(/[^0-9]/g, '') : "0";
+
+                // 搜尋邏輯：名字包含關鍵字 且 狀態不是 TRUE (未勾選)
+                if (customer.toLowerCase().includes(query) && status !== "TRUE") {
+                    html += `
+                        <tr>
+                            <td>${itemName}</td>
+                            <td>${qty}</td>
+                            <td>$${price}</td>
+                            <td>$${subtotal}</td>
+                        </tr>
                     `;
-                    resultDiv.appendChild(div);
+                    userTotal += parseInt(subtotal) || 0;
                     found = true;
                 }
             }
 
-            if (!found) {
-                resultDiv.innerHTML = '<p style="text-align:center; color:#888;">查無待取貨商品，或名字輸入不完全。</p>';
+            html += `</tbody></table>`;
+
+            if (found) {
+                container.innerHTML = html + `
+                    <div class="total-section">
+                        待支付總合計：$${userTotal.toLocaleString()}
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `<div class="no-data">目前沒有您的待取貨紀錄喔！</div>`;
             }
 
         } catch (error) {
             console.error(error);
-            alert('讀取資料失敗，請檢查網路或試算表權限。');
+            alert('系統讀取失敗，請確認網路連線或試算表權限。');
         } finally {
             loading.style.display = 'none';
         }
