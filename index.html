@@ -5,42 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>訂單查詢系統</title>
     <style>
-        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: #f4f7f9; }
-        h2 { color: #2c3e50; text-align: center; margin-bottom: 20px; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; position: sticky; top: 10px; z-index: 100; }
-        input { flex: 1; padding: 15px; border: 2px solid #fd7e14; border-radius: 8px; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        button { padding: 15px 25px; background-color: #fd7e14; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        button:hover { background-color: #e8590c; }
+        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: #f0f2f5; }
+        h2 { color: #1a73e8; text-align: center; margin-bottom: 20px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { flex: 1; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; font-size: 16px; }
+        button { padding: 15px 20px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         
-        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid #fd7e14; }
+        /* 選擇名稱的按鈕樣式 */
+        .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; border: 1px dashed #1a73e8; }
+        .name-btn { padding: 10px 15px; background: white; border: 1px solid #1a73e8; border-radius: 20px; color: #1a73e8; cursor: pointer; font-weight: bold; }
+        .name-btn:hover { background: #1a73e8; color: white; }
+        
+        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid #34a853; }
         .item-row { display: flex; justify-content: space-between; align-items: center; }
-        .item-name { font-size: 1.1em; font-weight: bold; color: #333; margin-bottom: 5px; }
-        .item-details { color: #666; font-size: 0.9em; }
-        .item-price { font-weight: bold; color: #d9534f; font-size: 1.1em; }
+        .item-name { font-size: 1.1em; font-weight: bold; color: #333; }
+        .item-price { font-weight: bold; color: #d93025; font-size: 1.1em; }
         
-        .total-bar { margin-top: 20px; padding: 20px; background: #343a40; color: white; border-radius: 10px; text-align: right; font-size: 1.3em; font-weight: bold; }
-        .total-label { font-size: 0.7em; color: #ccc; margin-right: 10px; }
-        
-        #loading { text-align: center; display: none; padding: 20px; font-weight: bold; color: #fd7e14; }
-        .no-data { text-align: center; padding: 50px 20px; color: #999; }
+        .total-bar { margin-top: 20px; padding: 20px; background: #202124; color: white; border-radius: 10px; text-align: right; font-size: 1.3em; font-weight: bold; }
+        #loading { text-align: center; display: none; padding: 20px; color: #1a73e8; font-weight: bold; }
+        .no-data { text-align: center; padding: 50px 20px; color: #70757a; }
+        .instruction { font-size: 0.9em; color: #5f6368; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<h2>📦 我的待取貨清單</h2>
+<h2>📦 訂單查詢系統</h2>
 
 <div class="search-box">
-    <input type="text" id="nameInput" placeholder="請輸入正確暱稱 (不分大小寫)">
-    <button onclick="searchData()">查詢</button>
+    <input type="text" id="nameInput" placeholder="輸入名字關鍵字 (例: 阿勝)">
+    <button onclick="searchNames()">搜尋</button>
 </div>
 
-<div id="loading">讀取最新資料中...</div>
+<div id="loading">讀取中...</div>
+<div id="selectionArea"></div>
 <div id="results"></div>
 
 <script>
     const sheetId = '1pjTOojFm4-_rGpGGN9Nv31GCdYMPtSDQkfn8vbyBFLQ';
     const gid = '171915529';
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+    
+    let allRows = []; // 暫存所有讀取到的資料
 
     function parseCSV(text) {
         const rows = [];
@@ -48,98 +53,114 @@
         let currentField = '';
         let inQuotes = false;
         for (let i = 0; i < text.length; i++) {
-            const char = text[i];
-            const nextChar = text[i + 1];
+            const char = text[i]; const nextChar = text[i + 1];
             if (inQuotes) {
                 if (char === '"' && nextChar === '"') { currentField += '"'; i++; }
-                else if (char === '"') { inQuotes = false; }
-                else { currentField += char; }
+                else if (char === '"') inQuotes = false;
+                else currentField += char;
             } else {
-                if (char === '"') { inQuotes = true; }
+                if (char === '"') inQuotes = true;
                 else if (char === ',') { currentRow.push(currentField); currentField = ''; }
                 else if (char === '\n' || char === '\r') {
                     currentRow.push(currentField);
                     if (currentRow.length > 1 || currentRow[0] !== '') rows.push(currentRow);
                     currentRow = []; currentField = '';
                     if (char === '\r' && nextChar === '\n') i++;
-                } else { currentField += char; }
+                } else currentField += char;
             }
         }
         if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); }
         return rows;
     }
 
-    async function searchData() {
-        // 將使用者輸入轉為小寫
-        const rawInput = document.getElementById('nameInput').value.trim();
-        const query = rawInput.toLowerCase(); 
-        
-        if (!query) return alert('請輸入您的暱稱！');
+    // 第一步：搜尋包含關鍵字的所有名稱
+    async function searchNames() {
+        const query = document.getElementById('nameInput').value.trim().toLowerCase();
+        if (!query) return alert('請輸入名字關鍵字！');
 
+        const selectionArea = document.getElementById('selectionArea');
         const resultDiv = document.getElementById('results');
         const loading = document.getElementById('loading');
         
+        selectionArea.innerHTML = '';
         resultDiv.innerHTML = '';
         loading.style.display = 'block';
 
         try {
             const response = await fetch(csvUrl);
             const csvText = await response.text();
-            const rows = parseCSV(csvText);
+            allRows = parseCSV(csvText);
 
-            let grandTotal = 0;
-            let foundCount = 0;
-            let htmlContent = '';
-
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                const status = (row[0] || "").trim().toUpperCase();
-                const customerRaw = (row[2] || "").trim(); // 原始名稱
-                const customerLower = customerRaw.toLowerCase(); // 轉小寫用於比對
-                
-                const itemName = (row[3] || "").trim();
-                const qty = (row[4] || "").trim();
-                const cleanPrice = (row[5] || "").replace(/[$,]/g, '');
-                const cleanSubtotal = (row[12] || "").replace(/[$,]/g, '');
-                
-                const priceNum = parseInt(cleanPrice) || 0;
-                const subtotalNum = parseInt(cleanSubtotal) || 0;
-
-                // 精確比對 (不分大小寫)
-                if (customerLower === query && status !== "TRUE" && itemName !== "") {
-                    htmlContent += `
-                        <div class="card">
-                            <div class="item-name">${itemName}</div>
-                            <div class="item-row">
-                                <div class="item-details">
-                                    單價: $${priceNum.toLocaleString()} / 數量: ${qty}
-                                </div>
-                                <div class="item-price">$${subtotalNum.toLocaleString()}</div>
-                            </div>
-                        </div>
-                    `;
-                    grandTotal += subtotalNum;
-                    foundCount++;
+            // 找出所有符合條件的不重複名稱
+            const matchedNames = new Set();
+            for (let i = 1; i < allRows.length; i++) {
+                const customer = (allRows[i][2] || "").trim();
+                const status = (allRows[i][0] || "").trim().toUpperCase();
+                if (customer.toLowerCase().includes(query) && status !== "TRUE") {
+                    matchedNames.add(customer);
                 }
             }
 
-            if (foundCount > 0) {
-                resultDiv.innerHTML = htmlContent + `
-                    <div class="total-bar">
-                        <span class="total-label">待領取共 ${foundCount} 項，總計</span>
-                        $${grandTotal.toLocaleString()}
-                    </div>
-                `;
+            if (matchedNames.size === 0) {
+                selectionArea.innerHTML = `<div class="no-data">查無符合「${query}」的待取貨紀錄。</div>`;
+            } else if (matchedNames.size === 1) {
+                // 如果只有一個符合，直接顯示
+                showDetails(Array.from(matchedNames)[0]);
             } else {
-                resultDiv.innerHTML = `<div class="no-data">📭 查無「${rawInput}」的待取貨紀錄。<br><small>請確保名字與試算表完全一致（包含點或符號）。</small></div>`;
+                // 如果有多個符合，顯示按鈕讓客戶點選
+                let btnHtml = `<div class="instruction">找到多個名稱，請點選正確的名稱：</div><div class="name-selector">`;
+                matchedNames.forEach(name => {
+                    btnHtml += `<button class="name-btn" onclick="showDetails('${name.replace(/'/g, "\\'")}')">${name}</button>`;
+                });
+                btnHtml += `</div>`;
+                selectionArea.innerHTML = btnHtml;
             }
-
         } catch (error) {
             console.error(error);
-            alert('系統讀取失敗！');
+            alert('讀取失敗，請檢查網路！');
         } finally {
             loading.style.display = 'none';
         }
+    }
+
+    // 第二步：顯示指定名稱的明細
+    function showDetails(targetName) {
+        const resultDiv = document.getElementById('results');
+        let htmlContent = `<div style="margin-bottom:10px; font-weight:bold; color:#1a73e8;">📍 正在顯示 ${targetName} 的明細：</div>`;
+        let grandTotal = 0;
+        let count = 0;
+
+        for (let i = 1; i < allRows.length; i++) {
+            const row = allRows[i];
+            const status = (row[0] || "").trim().toUpperCase();
+            const customer = (row[2] || "").trim();
+            const itemName = (row[3] || "").trim();
+            const qty = (row[4] || "").trim();
+            const subtotal = parseInt((row[12] || "").replace(/[$,]/g, '')) || 0;
+
+            if (customer === targetName && status !== "TRUE" && itemName !== "") {
+                htmlContent += `
+                    <div class="card">
+                        <div class="item-name">${itemName}</div>
+                        <div class="item-row">
+                            <div style="color:#666; font-size:0.9em;">數量: ${qty}</div>
+                            <div class="item-price">$${subtotal.toLocaleString()}</div>
+                        </div>
+                    </div>
+                `;
+                grandTotal += subtotal;
+                count++;
+            }
+        }
+
+        resultDiv.innerHTML = htmlContent + `
+            <div class="total-bar">
+                <span style="font-size:0.6em; color:#aaa; margin-right:10px;">共 ${count} 項商品</span>
+                總計 $${grandTotal.toLocaleString()}
+            </div>
+        `;
+        // 點選後清空選擇區，讓畫面乾淨
+        document.getElementById('selectionArea').innerHTML = '';
     }
 </script>
 
