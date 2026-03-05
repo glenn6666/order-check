@@ -1,173 +1,179 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📦 出貨小助手 - 完整版</title>
+    <title>訂單查詢系統</title>
     <style>
-        :root { --blue: #1a73e8; --green: #34a853; --orange: #fbbc04; --red: #ea4335; --purple: #a142f4; --dark: #202124; --bg: #f0f4f8; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 10px; margin: 0; color: #3c4043; min-height: 100vh; display: flex; flex-direction: column; }
-        .container { max-width: 600px; margin: auto; flex: 1; width: 100%; }
+        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: #f0f2f5; }
+        h2 { color: #1a73e8; text-align: center; margin-bottom: 20px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 10px; }
+        input { flex: 1; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; font-size: 16px; }
+        button { padding: 15px 20px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         
-        .header { text-align: center; padding: 20px 0 10px 0; }
-        .header h1 { font-size: 24px; color: var(--blue); margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .header p { font-size: 14px; color: #666; margin: 5px 0 15px 0; }
+        /* 警語樣式 */
+        .warning-text { 
+            color: #e67e22; 
+            font-size: 0.85em; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            padding: 8px;
+            background-color: #fff3e0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
 
-        .search-card { position: sticky; top: 10px; background: white; padding: 18px; border-radius: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 100; border: 2px solid #e0e6ed; }
-        input { width: 100%; padding: 14px 20px; border: none; background: #f8f9fa; border-radius: 15px; font-size: 17px; box-sizing: border-box; outline: none; }
-
-        .empty-state { text-align: center; padding: 50px 20px; color: #99aab5; }
-        .empty-state .emoji { font-size: 60px; display: block; margin-bottom: 10px; }
-
-        .group-card { background: white; margin-top: 20px; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-left: 12px solid; animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .c-0 { border-color: var(--blue); }
-        .c-1 { border-color: var(--green); }
-        .c-2 { border-color: var(--orange); }
-        .c-none { border-color: #bdc1c6; }
-
-        .group-header { padding: 15px 20px; font-weight: 800; background: #fafbfc; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; }
-        .total-badge { background: var(--red); color: white; padding: 5px 15px; border-radius: 25px; font-size: 16px; font-weight: 900; box-shadow: 0 4px 8px rgba(234, 67, 53, 0.3); }
+        .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; border: 1px dashed #1a73e8; }
+        .name-btn { padding: 10px 15px; background: white; border: 1px solid #1a73e8; border-radius: 20px; color: #1a73e8; cursor: pointer; font-weight: bold; }
+        .name-btn:hover { background: #1a73e8; color: white; }
         
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 20px; border-bottom: 1px solid #f1f3f4; vertical-align: top; }
+        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid #34a853; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; }
+        .item-name { font-size: 1.1em; font-weight: bold; color: #333; }
+        .item-price { font-weight: bold; color: #d93025; font-size: 1.1em; }
         
-        .item-title { font-size: 20px; font-weight: 800; color: #1a202c; display: block; margin-bottom: 12px; }
-        
-        .shop-list-container { display: flex; flex-wrap: wrap; gap: 10px; }
-        .shop-item { background: #edf2f7; padding: 10px 14px; border-radius: 12px; font-size: 17px; color: #2d3748; border: 1px solid #e2e8f0; }
-        .shop-item b { font-size: 26px; color: var(--red); margin-left: 5px; font-family: 'Arial Black', sans-serif; }
-        
-        .special-item { background: #fff5f5; border: 1px solid var(--red); color: var(--red); }
-
-        .qty-cell { text-align: right; font-weight: 900; font-size: 36px; color: var(--blue); width: 85px; padding-top: 25px !important; }
-        .note-tag { font-size: 14px; color: white; background: var(--red); padding: 6px 12px; border-radius: 8px; display: inline-block; margin-top: 15px; font-weight: 700; }
-
-        /* 底部警語樣式 */
-        .warning-footer { text-align: center; padding: 25px 15px; color: #888; font-size: 13px; line-height: 1.6; border-top: 1px solid #e2e8f0; margin-top: 40px; }
-        .warning-footer b { color: var(--red); }
+        .total-bar { margin-top: 20px; padding: 20px; background: #202124; color: white; border-radius: 10px; text-align: right; font-size: 1.3em; font-weight: bold; }
+        #loading { text-align: center; display: none; padding: 20px; color: #1a73e8; font-weight: bold; }
+        .no-data { text-align: center; padding: 50px 20px; color: #70757a; }
+        .instruction { font-size: 0.9em; color: #5f6368; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <h1>📦 出貨快速查詢系統</h1>
-        <p>叫貨聯動與多廠商版 ✨</p>
-    </div>
 
-    <div class="search-card">
-        <input type="text" id="searchInput" placeholder="🔍 請輸入關鍵字 (如：網市)..." oninput="debounceSearch()">
-    </div>
+<h2>📦 訂單查詢系統</h2>
 
-    <div id="displayArea">
-        <div class="empty-state">
-            <span class="emoji">🕵️‍♂️</span>
-            <p>準備好了！請輸入關鍵字開始查詢</p>
-        </div>
-    </div>
-
-    <div class="warning-footer">
-        ⚠️ <b>溫馨提示：</b><br>
-        系統偶有出錯的可能，若有問題請直接詢問版面小編。
-    </div>
+<div class="search-box">
+    <input type="text" id="nameInput" placeholder="輸入名字關鍵字 (例: 阿勝)">
+    <button onclick="searchNames()">搜尋</button>
 </div>
 
+<div class="warning-text">
+    ⚠️ 系統偶有出錯的可能，若有問題請直接詢問版面小編
+</div>
+
+<div id="loading">讀取中...</div>
+<div id="selectionArea"></div>
+<div id="results"></div>
+
 <script>
-    const SHEET_ID = '2PACX-1vSKJ-bbty6XrC42lhDt4IZkx30Xd5suv7asS7ujAncXMnv_AnHBRNuXbxU_HeH3sNxduS22z8I_rqF0'; 
-    const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?output=csv&gid=0`;
+    const sheetId = '1pjTOojFm4-_rGpGGN9Nv31GCdYMPtSDQkfn8vbyBFLQ';
+    const gid = '171915529';
+    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
     
-    const SHOP_MAP = { "中港": 3, "小米妮": 4, "北冰": 5, "小賴": 6, "安星": 7, "新廠商": 8 };
+    let allRows = [];
 
-    let timer = null;
-    function debounceSearch() { clearTimeout(timer); timer = setTimeout(fetchData, 300); }
-
-    async function fetchData() {
-        const query = document.getElementById('searchInput').value.trim();
-        const area = document.getElementById('displayArea');
-        if (!query) { 
-            area.innerHTML = `<div class="empty-state"><span class="emoji">🕵️‍♂️</span><p>準備好了！請輸入關鍵字開始查詢</p></div>`;
-            return; 
-        }
-        try {
-            const resp = await fetch(`${SHEET_URL}&cache=${Date.now()}`);
-            const csv = await resp.text();
-            const rows = csv.split(/\r?\n/).map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-            const filtered = rows.filter(r => r[0] && r[0].replace(/"/g, '').includes(query));
-            if (filtered.length === 0) { 
-                area.innerHTML = `<div class="empty-state"><span class="emoji">😅</span><p>喔不！找不到相關品項...</p></div>`;
-                return; 
+    function parseCSV(text) {
+        const rows = [];
+        let currentRow = [];
+        let currentField = '';
+        let inQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i]; const nextChar = text[i + 1];
+            if (inQuotes) {
+                if (char === '"' && nextChar === '"') { currentField += '"'; i++; }
+                else if (char === '"') inQuotes = false;
+                else currentField += char;
+            } else {
+                if (char === '"') inQuotes = true;
+                else if (char === ',') { currentRow.push(currentField); currentField = ''; }
+                else if (char === '\n' || char === '\r') {
+                    currentRow.push(currentField);
+                    if (currentRow.length > 1 || currentRow[0] !== '') rows.push(currentRow);
+                    currentRow = []; currentField = '';
+                    if (char === '\r' && nextChar === '\n') i++;
+                } else currentField += char;
             }
-            renderGroups(filtered);
-        } catch (e) { console.error(e); }
+        }
+        if (currentField || currentRow.length > 0) { currentRow.push(currentField); rows.push(currentRow); }
+        return rows;
     }
 
-    function renderGroups(matches) {
-        const area = document.getElementById('displayArea');
-        area.innerHTML = "";
-        const finalGroups = {};
+    async function searchNames() {
+        const query = document.getElementById('nameInput').value.trim().toLowerCase();
+        if (!query) return alert('請輸入名字關鍵字！');
 
-        matches.forEach(row => {
-            const name = row[0].replace(/"/g, '');
-            const ruleStr = (row[12] || "").replace(/"/g, '').trim(); 
-            const note = (row[13] || "").replace(/"/g, '').trim();
-            const orderQty = parseInt(row[10]) || 0; 
-            const extraQty = parseInt(row[11]) || 0; 
-            
-            const rules = ruleStr === "" ? ["全部"] : ruleStr.split('/').map(r => r.trim());
-            let used = new Set();
+        const selectionArea = document.getElementById('selectionArea');
+        const resultDiv = document.getElementById('results');
+        const loading = document.getElementById('loading');
+        
+        selectionArea.innerHTML = '';
+        resultDiv.innerHTML = '';
+        loading.style.display = 'block';
 
-            rules.forEach((rName, idx) => {
-                let sub = 0, detailHtmlArr = [];
-                const isAll = rName === "全部";
-                
-                for (const [sName, sIdx] of Object.entries(SHOP_MAP)) {
-                    if (isAll || rName.split('+').some(t => sName.includes(t.trim()))) {
-                        let v = parseInt(row[sIdx]) || 0;
-                        if (v !== 0) { 
-                            detailHtmlArr.push(`<div class="shop-item">🏠 ${sName}<b>${v}</b></div>`); 
-                            sub += v; 
-                            if(!isAll) used.add(sName);
-                        }
-                    }
-                }
+        try {
+            const response = await fetch(csvUrl);
+            const csvText = await response.text();
+            allRows = parseCSV(csvText);
 
-                if (isAll && orderQty > 0) {
-                    detailHtmlArr.push(`<div class="shop-item special-item">📌 叫貨<b>${orderQty}</b></div>`);
-                    detailHtmlArr.push(`<div class="shop-item special-item">📌 多<b>${extraQty}</b></div>`);
-                }
-
-                if (sub !== 0 || detailHtmlArr.length > 0) {
-                    if (!finalGroups[rName]) finalGroups[rName] = { idx, items: [] };
-                    finalGroups[rName].items.push({ name, sub, detail: detailHtmlArr.join(' '), note });
-                }
-            });
-
-            if (ruleStr !== "") {
-                let oSum = 0, oDetailHtml = [];
-                for (const [sName, sIdx] of Object.entries(SHOP_MAP)) {
-                    if (!used.has(sName)) {
-                        let v = parseInt(row[sIdx]) || 0;
-                        if (v !== 0) { oDetailHtml.push(`<div class="shop-item">🏠 ${sName}<b>${v}</b></div>`); oSum += v; }
-                    }
-                }
-                if (oSum !== 0) {
-                    if (!finalGroups["其他"]) finalGroups["其他"] = { idx: 99, items: [] };
-                    finalGroups["其他"].items.push({ name, sub: oSum, detail: oDetailHtml.join(' '), note });
+            const matchedNames = new Set();
+            for (let i = 1; i < allRows.length; i++) {
+                const customer = (allRows[i][2] || "").trim();
+                const status = (allRows[i][0] || "").trim().toUpperCase();
+                if (customer.toLowerCase().includes(query) && status !== "TRUE") {
+                    matchedNames.add(customer);
                 }
             }
-        });
 
-        for (const [gName, data] of Object.entries(finalGroups)) {
-            const colorClass = (gName === "其他" || gName === "全部") ? "c-none" : `c-${data.idx % 3}`;
-            const total = data.items.reduce((s, i) => s + i.sub, 0);
-            let html = `<div class="group-card ${colorClass}"><div class="group-header"><span>📍 ${gName} 分組</span><span class="total-badge">🔢 累計 ${total}</span></div><table>`;
-            data.items.forEach(item => {
-                html += `<tr><td><span class="item-title">🔹 ${item.name}</span><div class="shop-list-container">${item.detail}</div>${item.note && item.note !== "備註" ? `<span class="note-tag">📝 備註：${item.note}</span>` : ''}</td><td class="qty-cell">${item.sub || ''}</td></tr>`;
-            });
-            area.innerHTML += html + "</table></div>";
+            if (matchedNames.size === 0) {
+                selectionArea.innerHTML = `<div class="no-data">查無符合「${query}」的待取貨紀錄。</div>`;
+            } else if (matchedNames.size === 1) {
+                showDetails(Array.from(matchedNames)[0]);
+            } else {
+                let btnHtml = `<div class="instruction">找到多個名稱，請點選正確的名稱：</div><div class="name-selector">`;
+                matchedNames.forEach(name => {
+                    btnHtml += `<button class="name-btn" onclick="showDetails('${name.replace(/'/g, "\\'")}')">${name}</button>`;
+                });
+                btnHtml += `</div>`;
+                selectionArea.innerHTML = btnHtml;
+            }
+        } catch (error) {
+            console.error(error);
+            alert('讀取失敗，請檢查網路！');
+        } finally {
+            loading.style.display = 'none';
         }
+    }
+
+    function showDetails(targetName) {
+        const resultDiv = document.getElementById('results');
+        let htmlContent = `<div style="margin-bottom:10px; font-weight:bold; color:#1a73e8;">📍 正在顯示 ${targetName} 的明細：</div>`;
+        let grandTotal = 0;
+        let count = 0;
+
+        for (let i = 1; i < allRows.length; i++) {
+            const row = allRows[i];
+            const status = (row[0] || "").trim().toUpperCase();
+            const customer = (row[2] || "").trim();
+            const itemName = (row[3] || "").trim();
+            const qty = (row[4] || "").trim();
+            // 修正 $1,900 等包含逗號的解析問題
+            const subtotalText = (row[12] || "").replace(/[$,]/g, '');
+            const subtotal = parseInt(subtotalText) || 0;
+
+            if (customer === targetName && status !== "TRUE" && itemName !== "") {
+                htmlContent += `
+                    <div class="card">
+                        <div class="item-name">${itemName}</div>
+                        <div class="item-row">
+                            <div style="color:#666; font-size:0.9em;">數量: ${qty}</div>
+                            <div class="item-price">$${subtotal.toLocaleString()}</div>
+                        </div>
+                    </div>
+                `;
+                grandTotal += subtotal;
+                count++;
+            }
+        }
+
+        resultDiv.innerHTML = htmlContent + `
+            <div class="total-bar">
+                <span style="font-size:0.6em; color:#aaa; margin-right:10px;">共 ${count} 項商品</span>
+                總計 $${grandTotal.toLocaleString()}
+            </div>
+        `;
+        document.getElementById('selectionArea').innerHTML = '';
     }
 </script>
+
 </body>
 </html>
