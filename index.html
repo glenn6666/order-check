@@ -16,7 +16,6 @@
             background-color: #fff3e0; border-radius: 5px; font-weight: bold;
         }
 
-        /* 區塊標題 */
         .section-title { margin: 20px 0 10px 0; padding: 8px 12px; border-radius: 5px; font-weight: bold; display: flex; align-items: center; }
         .title-arrived { background-color: #e6f4ea; color: #1e8e3e; border-left: 5px solid #1e8e3e; }
         .title-not-arrived { background-color: #f1f3f4; color: #5f6368; border-left: 5px solid #5f6368; }
@@ -24,7 +23,6 @@
         .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; border: 1px dashed #1a73e8; }
         .name-btn { padding: 10px 15px; background: white; border: 1px solid #1a73e8; border-radius: 20px; color: #1a73e8; cursor: pointer; font-weight: bold; }
         
-        /* 卡片樣式 */
         .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         .arrived-card { border-left: 5px solid #34a853; }
         .not-arrived-card { border-left: 5px solid #adb5bd; background-color: #fafafa; color: #6c757d; }
@@ -33,17 +31,17 @@
         .item-row { display: flex; justify-content: space-between; align-items: flex-end; }
         .item-details { color: #666; font-size: 0.9em; line-height: 1.5; }
         .item-price { font-weight: bold; color: #d93025; font-size: 1.1em; }
-        .not-arrived-card .item-price, .not-arrived-card .item-details { color: #888; }
 
         .empty-msg { text-align: center; padding: 20px; color: #999; font-size: 0.9em; background: #fff; border-radius: 10px; border: 1px dashed #ddd; }
         
-        /* 總結區塊 */
         .total-container { margin-top: 30px; background: #202124; color: white; border-radius: 10px; padding: 20px; }
         .total-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #3c4043; }
         .total-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .total-label { font-size: 0.9em; color: #aaa; }
         .total-value { font-weight: bold; text-align: right; }
         .total-price { color: #ffab00; font-size: 1.2em; }
+        .no-data { text-align: center; padding: 50px 20px; color: #70757a; }
+        .instruction { font-size: 0.9em; color: #5f6368; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -59,7 +57,6 @@
     ⚠️ 系統偶有出錯的可能，若有問題請直接詢問版面小編
 </div>
 
-<div id="loading">讀取中...</div>
 <div id="selectionArea"></div>
 <div id="results"></div>
 
@@ -101,8 +98,9 @@
         if (!query) return alert('請輸入名字關鍵字！');
         const selectionArea = document.getElementById('selectionArea');
         const resultDiv = document.getElementById('results');
-        const loading = document.getElementById('loading');
-        selectionArea.innerHTML = ''; resultDiv.innerHTML = ''; loading.style.display = 'block';
+        
+        selectionArea.innerHTML = ''; 
+        resultDiv.innerHTML = ''; 
 
         try {
             const response = await fetch(csvUrl);
@@ -130,7 +128,7 @@
                 btnHtml += `</div>`;
                 selectionArea.innerHTML = btnHtml;
             }
-        } catch (error) { alert('讀取失敗！'); } finally { loading.style.display = 'none'; }
+        } catch (error) { alert('讀取失敗！'); }
     }
 
     function showDetails(targetName) {
@@ -211,4 +209,3 @@
 
 </body>
 </html>
-
