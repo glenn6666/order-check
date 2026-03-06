@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>訂單查詢系統</title>
+    <title>安星水產泰山店訂單查詢系統</title>
     <style>
         body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: #f0f2f5; }
         h2 { color: #1a73e8; text-align: center; margin-bottom: 20px; }
@@ -11,7 +11,6 @@
         input { flex: 1; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; font-size: 16px; }
         button { padding: 15px 20px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         
-        /* 警語樣式 */
         .warning-text { 
             color: #e67e22; 
             font-size: 0.85em; 
@@ -28,11 +27,14 @@
         .name-btn:hover { background: #1a73e8; color: white; }
         
         .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid #34a853; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; }
-        .item-name { font-size: 1.1em; font-weight: bold; color: #333; }
+        .item-name { font-size: 1.1em; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .item-row { display: flex; justify-content: space-between; align-items: flex-end; }
+        .item-details { color: #666; font-size: 0.9em; line-height: 1.5; }
         .item-price { font-weight: bold; color: #d93025; font-size: 1.1em; }
         
-        .total-bar { margin-top: 20px; padding: 20px; background: #202124; color: white; border-radius: 10px; text-align: right; font-size: 1.3em; font-weight: bold; }
+        .total-bar { margin-top: 20px; padding: 20px; background: #202124; color: white; border-radius: 10px; text-align: right; font-size: 1.2em; font-weight: bold; }
+        .total-info { font-size: 0.65em; color: #aaa; margin-right: 15px; font-weight: normal; }
+        
         #loading { text-align: center; display: none; padding: 20px; color: #1a73e8; font-weight: bold; }
         .no-data { text-align: center; padding: 50px 20px; color: #70757a; }
         .instruction { font-size: 0.9em; color: #5f6368; margin-bottom: 10px; }
@@ -40,7 +42,7 @@
 </head>
 <body>
 
-<h2>📦 訂單查詢系統</h2>
+<h2>📦 安星水產泰山店訂單查詢系統</h2>
 
 <div class="search-box">
     <input type="text" id="nameInput" placeholder="輸入名字關鍵字 (例: 阿勝)">
@@ -138,37 +140,48 @@
         const resultDiv = document.getElementById('results');
         let htmlContent = `<div style="margin-bottom:10px; font-weight:bold; color:#1a73e8;">📍 正在顯示 ${targetName} 的明細：</div>`;
         let grandTotal = 0;
-        let count = 0;
+        let totalItems = 0; // 品項數 (rows)
+        let totalQuantity = 0; // 商品總數 (qty 加總)
 
         for (let i = 1; i < allRows.length; i++) {
             const row = allRows[i];
             const status = (row[0] || "").trim().toUpperCase();
             const customer = (row[2] || "").trim();
             const itemName = (row[3] || "").trim();
-            const qty = (row[4] || "").trim();
-            // 修正 $1,900 等包含逗號的解析問題
+            const qtyText = (row[4] || "").trim();
+            const qty = parseInt(qtyText) || 0;
+            
+            const priceText = (row[5] || "").replace(/[$,]/g, '');
+            const price = parseInt(priceText) || 0;
+
             const subtotalText = (row[12] || "").replace(/[$,]/g, '');
             const subtotal = parseInt(subtotalText) || 0;
 
             if (customer === targetName && status !== "TRUE" && itemName !== "") {
+                // 黃色框框：加入單價顯示
                 htmlContent += `
                     <div class="card">
                         <div class="item-name">${itemName}</div>
                         <div class="item-row">
-                            <div style="color:#666; font-size:0.9em;">數量: ${qty}</div>
+                            <div class="item-details">
+                                單價: $${price.toLocaleString()}<br>
+                                數量: ${qty}
+                            </div>
                             <div class="item-price">$${subtotal.toLocaleString()}</div>
                         </div>
                     </div>
                 `;
                 grandTotal += subtotal;
-                count++;
+                totalQuantity += qty;
+                totalItems++;
             }
         }
 
+        // 綠色框框：修改總計列資訊
         resultDiv.innerHTML = htmlContent + `
             <div class="total-bar">
-                <span style="font-size:0.6em; color:#aaa; margin-right:10px;">共 ${count} 項商品</span>
-                總計 $${grandTotal.toLocaleString()}
+                <span class="total-info">共 ${totalItems} 個品項，共 ${totalQuantity} 個商品</span>
+                <span style="font-size:0.8em; margin-right:5px;">總計</span>$${grandTotal.toLocaleString()}
             </div>
         `;
         document.getElementById('selectionArea').innerHTML = '';
