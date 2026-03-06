@@ -16,29 +16,34 @@
             background-color: #fff3e0; border-radius: 5px; font-weight: bold;
         }
 
+        /* 區塊標題 */
+        .section-title { margin: 20px 0 10px 0; padding: 8px 12px; border-radius: 5px; font-weight: bold; display: flex; align-items: center; }
+        .title-arrived { background-color: #e6f4ea; color: #1e8e3e; border-left: 5px solid #1e8e3e; }
+        .title-not-arrived { background-color: #f1f3f4; color: #5f6368; border-left: 5px solid #5f6368; }
+
         .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; border: 1px dashed #1a73e8; }
         .name-btn { padding: 10px 15px; background: white; border: 1px solid #1a73e8; border-radius: 20px; color: #1a73e8; cursor: pointer; font-weight: bold; }
         
-        /* 一般卡片樣式 (已到貨) */
-        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 5px solid #34a853; }
+        /* 卡片樣式 */
+        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .arrived-card { border-left: 5px solid #34a853; }
+        .not-arrived-card { border-left: 5px solid #adb5bd; background-color: #fafafa; color: #6c757d; }
         
-        /* 未到貨卡片樣式 (變灰色) */
-        .card.not-arrived { background: #f8f9fa; border-left: 5px solid #adb5bd; color: #6c757d; }
-        .card.not-arrived .item-name { color: #6c757d; }
-        .card.not-arrived .item-price { color: #6c757d; }
-        
-        .item-name { font-size: 1.1em; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .item-name { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; }
         .item-row { display: flex; justify-content: space-between; align-items: flex-end; }
         .item-details { color: #666; font-size: 0.9em; line-height: 1.5; }
-        .not-arrived-tag { color: #d93025; font-weight: bold; font-size: 0.85em; margin-left: 5px; }
         .item-price { font-weight: bold; color: #d93025; font-size: 1.1em; }
+        .not-arrived-card .item-price, .not-arrived-card .item-details { color: #888; }
+
+        .empty-msg { text-align: center; padding: 20px; color: #999; font-size: 0.9em; background: #fff; border-radius: 10px; border: 1px dashed #ddd; }
         
-        .total-bar { margin-top: 20px; padding: 20px; background: #202124; color: white; border-radius: 10px; text-align: right; font-size: 1.2em; font-weight: bold; }
-        .total-info { font-size: 0.65em; color: #aaa; margin-right: 15px; font-weight: normal; }
-        
-        #loading { text-align: center; display: none; padding: 20px; color: #1a73e8; font-weight: bold; }
-        .no-data { text-align: center; padding: 50px 20px; color: #70757a; }
-        .instruction { font-size: 0.9em; color: #5f6368; margin-bottom: 10px; }
+        /* 總結區塊 */
+        .total-container { margin-top: 30px; background: #202124; color: white; border-radius: 10px; padding: 20px; }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #3c4043; }
+        .total-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .total-label { font-size: 0.9em; color: #aaa; }
+        .total-value { font-weight: bold; text-align: right; }
+        .total-price { color: #ffab00; font-size: 1.2em; }
     </style>
 </head>
 <body>
@@ -94,14 +99,10 @@
     async function searchNames() {
         const query = document.getElementById('nameInput').value.trim().toLowerCase();
         if (!query) return alert('請輸入名字關鍵字！');
-
         const selectionArea = document.getElementById('selectionArea');
         const resultDiv = document.getElementById('results');
         const loading = document.getElementById('loading');
-        
-        selectionArea.innerHTML = '';
-        resultDiv.innerHTML = '';
-        loading.style.display = 'block';
+        selectionArea.innerHTML = ''; resultDiv.innerHTML = ''; loading.style.display = 'block';
 
         try {
             const response = await fetch(csvUrl);
@@ -129,66 +130,85 @@
                 btnHtml += `</div>`;
                 selectionArea.innerHTML = btnHtml;
             }
-        } catch (error) {
-            console.error(error);
-            alert('讀取失敗，請檢查網路！');
-        } finally {
-            loading.style.display = 'none';
-        }
+        } catch (error) { alert('讀取失敗！'); } finally { loading.style.display = 'none'; }
     }
 
     function showDetails(targetName) {
         const resultDiv = document.getElementById('results');
-        let htmlContent = `<div style="margin-bottom:10px; font-weight:bold; color:#1a73e8;">📍 正在顯示 ${targetName} 的明細：</div>`;
-        let grandTotal = 0;
-        let totalItems = 0;
-        let totalQuantity = 0;
+        
+        let arrivedHtml = `<div class="section-title title-arrived">✅ 已到貨商品</div>`;
+        let notArrivedHtml = `<div class="section-title title-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
+        
+        let stats = {
+            arrived: { items: 0, qty: 0, total: 0 },
+            notArrived: { items: 0, qty: 0, total: 0 }
+        };
+
+        let hasArrived = false;
+        let hasNotArrived = false;
 
         for (let i = 1; i < allRows.length; i++) {
             const row = allRows[i];
             const status = (row[0] || "").trim().toUpperCase();
-            const note = (row[1] || "").trim(); // 獲取 B 欄備註
+            const note = (row[1] || "").trim();
             const customer = (row[2] || "").trim();
             const itemName = (row[3] || "").trim();
+            if (customer !== targetName || status === "TRUE" || itemName === "") continue;
+
             const qty = parseInt((row[4] || "").trim()) || 0;
             const price = parseInt((row[5] || "").replace(/[$,]/g, '')) || 0;
             const subtotal = parseInt((row[12] || "").replace(/[$,]/g, '')) || 0;
+            const isNotArrived = note.includes("未到貨");
 
-            if (customer === targetName && status !== "TRUE" && itemName !== "") {
-                const isNotArrived = note.includes("未到貨"); // 判斷是否未到貨
-                
-                htmlContent += `
-                    <div class="card ${isNotArrived ? 'not-arrived' : ''}">
-                        <div class="item-name">
-                            ${itemName}
-                            ${isNotArrived ? '<span class="not-arrived-tag">(未到貨)</span>' : ''}
-                        </div>
-                        <div class="item-row">
-                            <div class="item-details" style="${isNotArrived ? 'color:#6c757d;' : ''}">
-                                單價: $${price.toLocaleString()}<br>
-                                數量: ${qty}
-                            </div>
-                            <div class="item-price" style="${isNotArrived ? 'color:#6c757d;' : ''}">
-                                $${subtotal.toLocaleString()}
-                            </div>
-                        </div>
+            const cardHtml = `
+                <div class="card ${isNotArrived ? 'not-arrived-card' : 'arrived-card'}">
+                    <div class="item-name">${itemName}</div>
+                    <div class="item-row">
+                        <div class="item-details">單價: $${price.toLocaleString()}<br>數量: ${qty}</div>
+                        <div class="item-price">$${subtotal.toLocaleString()}</div>
                     </div>
-                `;
-                grandTotal += subtotal;
-                totalQuantity += qty;
-                totalItems++;
+                </div>`;
+
+            if (isNotArrived) {
+                notArrivedHtml += cardHtml;
+                stats.notArrived.items++;
+                stats.notArrived.qty += qty;
+                stats.notArrived.total += subtotal;
+                hasNotArrived = true;
+            } else {
+                arrivedHtml += cardHtml;
+                stats.arrived.items++;
+                stats.arrived.qty += qty;
+                stats.arrived.total += subtotal;
+                hasArrived = true;
             }
         }
 
-        resultDiv.innerHTML = htmlContent + `
-            <div class="total-bar">
-                <span class="total-info">共 ${totalItems} 個品項，共 ${totalQuantity} 個商品</span>
-                <span style="font-size:0.8em; margin-right:5px;">總計</span>$${grandTotal.toLocaleString()}
-            </div>
-        `;
+        if (!hasArrived) arrivedHtml += `<div class="empty-msg">目前沒有已到貨商品</div>`;
+        if (!hasNotArrived) notArrivedHtml += `<div class="empty-msg">目前沒有未到貨商品</div>`;
+
+        const summaryHtml = `
+            <div class="total-container">
+                <div style="font-size:0.9em; margin-bottom:15px; color:#ffab00;">📊 查詢總結：${targetName}</div>
+                <div class="total-row">
+                    <div class="total-label">已到貨合計<br>(${stats.arrived.items}品項 / ${stats.arrived.qty}商品)</div>
+                    <div class="total-value total-price">$${stats.arrived.total.toLocaleString()}</div>
+                </div>
+                <div class="total-row">
+                    <div class="total-label">未到貨合計<br>(${stats.notArrived.items}品項 / ${stats.notArrived.qty}商品)</div>
+                    <div class="total-value">$${stats.notArrived.total.toLocaleString()}</div>
+                </div>
+                <div class="total-row" style="border-top: 1px solid #555; padding-top:15px; margin-top:5px;">
+                    <div class="total-label" style="color:#fff;">應付金額總計</div>
+                    <div class="total-value" style="font-size:1.4em; color:#fff;">$${(stats.arrived.total + stats.notArrived.total).toLocaleString()}</div>
+                </div>
+            </div>`;
+
+        resultDiv.innerHTML = `<div style="margin-bottom:10px; font-weight:bold; color:#1a73e8;">📍 查詢結果：</div>` + arrivedHtml + notArrivedHtml + summaryHtml;
         document.getElementById('selectionArea').innerHTML = '';
     }
 </script>
 
 </body>
 </html>
+
