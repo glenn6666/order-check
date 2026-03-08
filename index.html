@@ -42,6 +42,15 @@
         .total-price { color: #ffab00; font-size: 1.2em; }
         .no-data { text-align: center; padding: 50px 20px; color: #70757a; }
         .instruction { font-size: 0.9em; color: #5f6368; margin-bottom: 10px; }
+
+        /* 名稱放大顯眼樣式 */
+        .highlight-name {
+            font-size: 1.4em;
+            color: #0d47a1;
+            font-weight: 900;
+            text-decoration: underline;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -96,6 +105,7 @@
     async function searchNames() {
         const query = document.getElementById('nameInput').value.trim().toLowerCase();
         if (!query) return alert('請輸入名字關鍵字！');
+        
         const selectionArea = document.getElementById('selectionArea');
         const resultDiv = document.getElementById('results');
         
@@ -117,7 +127,7 @@
             }
 
             if (matchedNames.size === 0) {
-                selectionArea.innerHTML = `<div class="no-data">查無符合「${query}」的待取貨紀錄。</div>`;
+                selectionArea.innerHTML = `<div class="no-data">查無符合「${document.getElementById('nameInput').value}」的待取貨紀錄。</div>`;
             } else if (matchedNames.size === 1) {
                 showDetails(Array.from(matchedNames)[0]);
             } else {
@@ -128,7 +138,9 @@
                 btnHtml += `</div>`;
                 selectionArea.innerHTML = btnHtml;
             }
-        } catch (error) { alert('讀取失敗！'); }
+        } catch (error) { 
+            console.error(error);
+        }
     }
 
     function showDetails(targetName) {
@@ -202,7 +214,14 @@
                 </div>
             </div>`;
 
-        resultDiv.innerHTML = `<div style="margin-bottom:10px; font-weight:bold; color:#1a73e8;">📍 查詢結果：</div>` + arrivedHtml + notArrivedHtml + summaryHtml;
+        // 這裡修改：將名稱放在標題後面並放大
+        resultDiv.innerHTML = `
+            <div style="margin-bottom:15px; font-weight:bold; color:#1a73e8; display:flex; align-items:center; flex-wrap:wrap;">
+                <span>📍 查詢結果：</span>
+                <span class="highlight-name">${targetName}</span>
+            </div>
+        ` + arrivedHtml + notArrivedHtml + summaryHtml;
+        
         document.getElementById('selectionArea').innerHTML = '';
     }
 </script>
