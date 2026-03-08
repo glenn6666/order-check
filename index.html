@@ -1,3 +1,17 @@
+沒問題！我已經根據您提供的最新樣式圖（包含 **查詢 ID 放大**、**卡片樣式優化**、以及**已到貨與未到貨區分**）重新編寫了完整的代碼。
+
+這次的更新重點：
+
+1. **查詢 ID 顯眼化**：使用深藍色大字體搭配「📍」圖示，讓客戶一眼確認搜尋對象。
+2. **卡片設計**：採用帶有微陰影與左側色條的圓角卡片，並加入「未取貨」的標籤感。
+3. **備註整合**：將試算表中的 **B 欄備註** 內容直接顯示在商品卡片最下方。
+4. **分區邏輯**：嚴格區分「已到貨」與「未到貨」兩大區塊。
+
+### 完整修正後的代碼 (index.html)
+
+請直接複製並覆蓋 GitHub 上的內容：
+
+```html
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -5,66 +19,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>安星水產泰山店訂單查詢系統</title>
     <style>
-        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: #f0f2f5; }
-        h2 { color: #1a73e8; text-align: center; margin-bottom: 20px; }
-        .search-box { display: flex; gap: 10px; margin-bottom: 10px; }
-        input { flex: 1; padding: 15px; border: 2px solid #1a73e8; border-radius: 8px; font-size: 16px; }
-        button { padding: 15px 20px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        
-        .warning-text { 
-            color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 8px;
-            background-color: #fff3e0; border-radius: 5px; font-weight: bold;
+        :root {
+            --primary-blue: #0d47a1;
+            --success-green: #34a853;
+            --pending-gray: #70757a;
+            --bg-color: #f0f2f5;
         }
-
-        .section-title { margin: 20px 0 10px 0; padding: 8px 12px; border-radius: 5px; font-weight: bold; display: flex; align-items: center; }
-        .title-arrived { background-color: #e6f4ea; color: #1e8e3e; border-left: 5px solid #1e8e3e; }
-        .title-not-arrived { background-color: #f1f3f4; color: #5f6368; border-left: 5px solid #5f6368; }
-
-        .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; border: 1px dashed #1a73e8; }
-        .name-btn { padding: 10px 15px; background: white; border: 1px solid #1a73e8; border-radius: 20px; color: #1a73e8; cursor: pointer; font-weight: bold; }
+        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); }
+        h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; }
         
-        .card { background: white; padding: 15px; margin-bottom: 12px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .arrived-card { border-left: 5px solid #34a853; }
-        .not-arrived-card { border-left: 5px solid #adb5bd; background-color: #fafafa; color: #6c757d; }
-        
-        .item-name { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; }
-        .item-row { display: flex; justify-content: space-between; align-items: flex-end; }
-        .item-details { color: #666; font-size: 0.9em; line-height: 1.5; }
-        .item-price { font-weight: bold; color: #d93025; font-size: 1.1em; }
+        /* 搜尋框 */
+        .search-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .search-box { display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary-blue); }
+        button { padding: 12px 25px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        .empty-msg { text-align: center; padding: 20px; color: #999; font-size: 0.9em; background: #fff; border-radius: 10px; border: 1px dashed #ddd; }
-        
-        .total-container { margin-top: 30px; background: #202124; color: white; border-radius: 10px; padding: 20px; }
-        .total-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #3c4043; }
-        .total-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .warning-text { color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 10px; background-color: #fff3e0; border-radius: 8px; font-weight: bold; }
+
+        /* 查詢結果標頭 */
+        .query-id-header { display: flex; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; border-left: 6px solid var(--primary-blue); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .query-id-text { font-size: 1.5em; font-weight: 900; color: var(--primary-blue); margin-left: 10px; }
+
+        /* 狀態分區標籤 */
+        .section-header { padding: 8px 15px; border-radius: 5px; font-weight: bold; margin: 25px 0 12px 0; display: flex; align-items: center; font-size: 1em; }
+        .header-arrived { background-color: #e6f4ea; color: var(--success-green); border-left: 5px solid var(--success-green); }
+        .header-not-arrived { background-color: #f1f3f4; color: var(--pending-gray); border-left: 5px solid var(--pending-gray); }
+
+        /* 商品卡片樣式 */
+        .card { background: white; padding: 18px; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative; border-left: 5px solid transparent; }
+        .arrived-card { border-left-color: var(--success-green); }
+        .not-arrived-card { border-left-color: var(--pending-gray); opacity: 0.85; }
+
+        .status-badge { background: #e8f0fe; color: var(--primary-blue); font-size: 0.75em; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: bold; }
+        .not-arrived-badge { background: #eee; color: #666; }
+
+        .item-name { font-size: 1.15em; font-weight: bold; color: #333; margin-bottom: 6px; }
+        .item-info { color: #666; font-size: 0.9em; margin-bottom: 8px; }
+        .item-note { font-size: 0.85em; color: #888; background: #f9f9f9; padding: 4px 8px; border-radius: 4px; display: inline-block; }
+        .item-price-tag { position: absolute; right: 18px; bottom: 18px; font-weight: bold; color: #d93025; font-size: 1.2em; }
+
+        .empty-msg { text-align: center; padding: 25px; color: #aaa; background: white; border-radius: 12px; border: 1px dashed #ddd; }
+
+        /* 總結區塊 */
+        .total-container { margin-top: 30px; background: #202124; color: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .total-row { display: flex; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #3c4043; }
+        .total-row:last-child { border-bottom: none; border-top: 1px solid #555; padding-top: 15px; margin-top: 5px; }
         .total-label { font-size: 0.9em; color: #aaa; }
-        .total-value { font-weight: bold; text-align: right; }
-        .total-price { color: #ffab00; font-size: 1.2em; }
-        .no-data { text-align: center; padding: 50px 20px; color: #70757a; }
-        .instruction { font-size: 0.9em; color: #5f6368; margin-bottom: 10px; }
+        .total-val { font-weight: bold; }
+        .grand-total { font-size: 1.5em; color: #ffab00; }
 
-        /* 名稱放大顯眼樣式 */
-        .highlight-name {
-            font-size: 1.4em;
-            color: #0d47a1;
-            font-weight: 900;
-            text-decoration: underline;
-            margin-left: 5px;
-        }
+        .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .name-btn { padding: 12px 20px; background: white; border: 2px solid var(--primary-blue); border-radius: 25px; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 1em; }
+        .name-btn:hover { background: var(--primary-blue); color: white; }
     </style>
 </head>
 <body>
 
-<h2>📦 安星水產泰山店訂單查詢系統</h2>
+<h2>安星水產泰山店訂單查詢系統</h2>
 
-<div class="search-box">
-    <input type="text" id="nameInput" placeholder="輸入名字關鍵字 (例: 阿勝)">
-    <button onclick="searchNames()">搜尋</button>
+<div class="search-container">
+    <div class="search-box">
+        <input type="text" id="nameInput" placeholder="輸入名字關鍵字 (例: 阿勝)">
+        <button onclick="searchNames()">搜尋</button>
+    </div>
 </div>
 
-<div class="warning-text">
-    ⚠️ 系統偶有出錯的可能，若有問題請直接詢問版面小編
-</div>
+<div class="warning-text">⚠️ 系統偶有出錯的可能，若有問題請直接詢問版面小編</div>
 
 <div id="selectionArea"></div>
 <div id="results"></div>
@@ -73,16 +94,12 @@
     const sheetId = '1pjTOojFm4-_rGpGGN9Nv31GCdYMPtSDQkfn8vbyBFLQ';
     const gid = '171915529';
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-    
     let allRows = [];
 
     function parseCSV(text) {
-        const rows = [];
-        let currentRow = [];
-        let currentField = '';
-        let inQuotes = false;
+        const rows = []; let currentRow = []; let currentField = ''; let inQuotes = false;
         for (let i = 0; i < text.length; i++) {
-            const char = text[i]; const nextChar = text[i + 1];
+            const char = text[i]; const nextChar = text[i+1];
             if (inQuotes) {
                 if (char === '"' && nextChar === '"') { currentField += '"'; i++; }
                 else if (char === '"') inQuotes = false;
@@ -104,127 +121,110 @@
 
     async function searchNames() {
         const query = document.getElementById('nameInput').value.trim().toLowerCase();
-        if (!query) return alert('請輸入名字關鍵字！');
-        
+        if (!query) return alert('請輸入關鍵字！');
         const selectionArea = document.getElementById('selectionArea');
         const resultDiv = document.getElementById('results');
-        
-        selectionArea.innerHTML = ''; 
-        resultDiv.innerHTML = ''; 
+        selectionArea.innerHTML = ''; resultDiv.innerHTML = '';
 
         try {
             const response = await fetch(csvUrl);
             const csvText = await response.text();
             allRows = parseCSV(csvText);
-
             const matchedNames = new Set();
             for (let i = 1; i < allRows.length; i++) {
                 const customer = (allRows[i][2] || "").trim();
                 const status = (allRows[i][0] || "").trim().toUpperCase();
-                if (customer.toLowerCase().includes(query) && status !== "TRUE") {
-                    matchedNames.add(customer);
-                }
+                if (customer.toLowerCase().includes(query) && status !== "TRUE") matchedNames.add(customer);
             }
-
             if (matchedNames.size === 0) {
-                selectionArea.innerHTML = `<div class="no-data">查無符合「${document.getElementById('nameInput').value}」的待取貨紀錄。</div>`;
+                resultDiv.innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無待取貨紀錄。</div>`;
             } else if (matchedNames.size === 1) {
                 showDetails(Array.from(matchedNames)[0]);
             } else {
-                let btnHtml = `<div class="instruction">找到多個名稱，請點選正確的名稱：</div><div class="name-selector">`;
+                let btnHtml = `<p style="color:#555; margin-bottom:10px;">請選擇您的正確名稱：</p><div class="name-selector">`;
                 matchedNames.forEach(name => {
                     btnHtml += `<button class="name-btn" onclick="showDetails('${name.replace(/'/g, "\\'")}')">${name}</button>`;
                 });
-                btnHtml += `</div>`;
-                selectionArea.innerHTML = btnHtml;
+                selectionArea.innerHTML = btnHtml + `</div>`;
             }
-        } catch (error) { 
-            console.error(error);
-        }
+        } catch (e) { alert('連線失敗！'); }
     }
 
     function showDetails(targetName) {
         const resultDiv = document.getElementById('results');
+        let stats = { arr: { i: 0, q: 0, t: 0 }, not: { i: 0, q: 0, t: 0 } };
+        let arrHtml = `<div class="section-header header-arrived">✅ 已到貨商品 (待處理)</div>`;
+        let notHtml = `<div class="section-header header-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
         
-        let arrivedHtml = `<div class="section-title title-arrived">✅ 已到貨商品</div>`;
-        let notArrivedHtml = `<div class="section-title title-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
-        
-        let stats = {
-            arrived: { items: 0, qty: 0, total: 0 },
-            notArrived: { items: 0, qty: 0, total: 0 }
-        };
-
-        let hasArrived = false;
-        let hasNotArrived = false;
+        let hasArr = false, hasNot = false;
 
         for (let i = 1; i < allRows.length; i++) {
             const row = allRows[i];
-            const status = (row[0] || "").trim().toUpperCase();
-            const note = (row[1] || "").trim();
             const customer = (row[2] || "").trim();
-            const itemName = (row[3] || "").trim();
-            if (customer !== targetName || status === "TRUE" || itemName === "") continue;
+            if (customer !== targetName || (row[0] || "").trim().toUpperCase() === "TRUE" || !row[3]) continue;
 
-            const qty = parseInt((row[4] || "").trim()) || 0;
-            const price = parseInt((row[5] || "").replace(/[$,]/g, '')) || 0;
-            const subtotal = parseInt((row[12] || "").replace(/[$,]/g, '')) || 0;
-            const isNotArrived = note.includes("未到貨");
+            const note = (row[1] || "").trim();
+            const itemName = row[3].trim();
+            const qty = parseInt(row[4]) || 0;
+            const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
+            const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
+            const isNot = note.includes("未到貨");
 
-            const cardHtml = `
-                <div class="card ${isNotArrived ? 'not-arrived-card' : 'arrived-card'}">
+            const card = `
+                <div class="card ${isNot ? 'not-arrived-card' : 'arrived-card'}">
+                    <div class="status-badge ${isNot ? 'not-arrived-badge' : ''}">${isNot ? '待到貨' : '未取貨'}</div>
                     <div class="item-name">${itemName}</div>
-                    <div class="item-row">
-                        <div class="item-details">單價: $${price.toLocaleString()}<br>數量: ${qty}</div>
-                        <div class="item-price">$${subtotal.toLocaleString()}</div>
-                    </div>
+                    <div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
+                    ${note ? `<div class="item-note">📝 備註: ${note}</div>` : ''}
+                    <div class="item-price-tag">$${subtotal.toLocaleString()}</div>
                 </div>`;
 
-            if (isNotArrived) {
-                notArrivedHtml += cardHtml;
-                stats.notArrived.items++;
-                stats.notArrived.qty += qty;
-                stats.notArrived.total += subtotal;
-                hasNotArrived = true;
+            if (isNot) {
+                notHtml += card; stats.not.i++; stats.not.q += qty; stats.not.t += subtotal; hasNot = true;
             } else {
-                arrivedHtml += cardHtml;
-                stats.arrived.items++;
-                stats.arrived.qty += qty;
-                stats.arrived.total += subtotal;
-                hasArrived = true;
+                arrHtml += card; stats.arr.i++; stats.arr.q += qty; stats.arr.t += subtotal; hasArr = true;
             }
         }
 
-        if (!hasArrived) arrivedHtml += `<div class="empty-msg">目前沒有已到貨商品</div>`;
-        if (!hasNotArrived) notArrivedHtml += `<div class="empty-msg">目前沒有未到貨商品</div>`;
-
-        const summaryHtml = `
+        const header = `<div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>`;
+        const total = `
             <div class="total-container">
-                <div style="font-size:0.9em; margin-bottom:15px; color:#ffab00;">📊 查詢總結：${targetName}</div>
                 <div class="total-row">
-                    <div class="total-label">已到貨合計<br>(${stats.arrived.items}品項 / ${stats.arrived.qty}商品)</div>
-                    <div class="total-value total-price">$${stats.arrived.total.toLocaleString()}</div>
+                    <div class="total-label">已到貨合計 (${stats.arr.i}品項 / ${stats.arr.q}件)</div>
+                    <div class="total-val">$${stats.arr.t.toLocaleString()}</div>
                 </div>
                 <div class="total-row">
-                    <div class="total-label">未到貨合計<br>(${stats.notArrived.items}品項 / ${stats.notArrived.qty}商品)</div>
-                    <div class="total-value">$${stats.notArrived.total.toLocaleString()}</div>
+                    <div class="total-label">未到貨合計 (${stats.not.i}品項 / ${stats.not.q}件)</div>
+                    <div class="total-val">$${stats.not.t.toLocaleString()}</div>
                 </div>
-                <div class="total-row" style="border-top: 1px solid #555; padding-top:15px; margin-top:5px;">
-                    <div class="total-label" style="color:#fff;">應付金額總計</div>
-                    <div class="total-value" style="font-size:1.4em; color:#fff;">$${(stats.arrived.total + stats.notArrived.total).toLocaleString()}</div>
+                <div class="total-row">
+                    <div class="total-label" style="color:white; font-size:1.1em;">應付金額總計</div>
+                    <div class="total-val grand-total">$${(stats.arr.t + stats.not.t).toLocaleString()}</div>
                 </div>
             </div>`;
 
-        // 這裡修改：將名稱放在標題後面並放大
-        resultDiv.innerHTML = `
-            <div style="margin-bottom:15px; font-weight:bold; color:#1a73e8; display:flex; align-items:center; flex-wrap:wrap;">
-                <span>📍 查詢結果：</span>
-                <span class="highlight-name">${targetName}</span>
-            </div>
-        ` + arrivedHtml + notArrivedHtml + summaryHtml;
-        
+        resultDiv.innerHTML = header + arrHtml + (hasArr ? '' : `<div class="empty-msg">目前無已到貨商品</div>`) + 
+                              notHtml + (hasNot ? '' : `<div class="empty-msg">目前無未到貨商品</div>`) + total;
         document.getElementById('selectionArea').innerHTML = '';
     }
 </script>
-
 </body>
 </html>
+
+```
+
+### 這次更新的視覺特點（與您的圖片一致）：
+
+1. **查詢 ID 藍色色條**：頂部顯示 `查詢 ID : @JAN` 的區塊現在有深藍色的左邊框與大字體。
+2. **已到貨綠色標籤**：分區標題使用淡淡的綠色底色，與您圖片中的 `已到貨商品 (待處理)` 樣式一致。
+3. **未取貨標籤**：每個商品卡片上方都有一個藍色小標籤標註 `未取貨`。
+4. **詳細資訊排版**：
+* **單價與數量**：放在商品名稱下方，用灰字顯示。
+* **備註**：如果試算表 B 欄有寫內容（例如：`最晚3/14` 或 `未到貨`），會以小圖示 `📝` 出現在卡片中。
+* **小計金額**：放在卡片右下角，使用顯眼的紅色粗體。
+
+
+
+更新到 GitHub 後，您的查詢系統介面應該會與您傳送的最後一張圖片非常接近了！如果有任何間距或顏色需要微調，隨時告訴我。
+</html>
+
