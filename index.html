@@ -7,15 +7,15 @@
     <style>
         :root {
             --primary-blue: #0d47a1;
-            --success-green: #34a853;
-            --pending-gray: #70757a;
-            --bg-color: #f0f2f5;
-            --gold-color: #ffab00; /* 金色 */
+            --success-green: #2e7d32; /* 較深的綠色，用於文字 */
+            --bg-success: #34a853;    /* 標籤用的綠色 */
+            --bg-pending: #70757a;    /* 標籤用的灰色 */
+            --bg-color: #f0f4f8;
+            --gold-color: #ffab00;
         }
-        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); }
-        h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; }
+        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; }
+        h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; font-weight: bold; }
         
-        /* 搜尋框區塊 */
         .search-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .search-box { display: flex; gap: 10px; }
         input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
@@ -28,38 +28,40 @@
         .query-id-text { font-size: 1.5em; font-weight: 900; color: var(--primary-blue); margin-left: 10px; }
 
         /* 狀態分區標頭 */
-        .section-header { padding: 8px 15px; border-radius: 5px; font-weight: bold; margin: 25px 0 12px 0; font-size: 1em; }
+        .section-header { padding: 10px 15px; border-radius: 8px; font-weight: bold; margin: 25px 0 12px 0; font-size: 1.05em; display: flex; align-items: center; }
         .header-arrived { background-color: #e6f4ea; color: var(--success-green); border-left: 5px solid var(--success-green); }
-        .header-not-arrived { background-color: #f1f3f4; color: var(--pending-gray); border-left: 5px solid var(--pending-gray); }
+        .header-not-arrived { background-color: #f1f3f4; color: #5f6368; border-left: 5px solid #5f6368; }
 
         /* 商品卡片樣式 */
-        .card { background: white; padding: 18px; margin-bottom: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: relative; border-left: 5px solid transparent; }
-        .arrived-card { border-left-color: var(--success-green); }
-        .not-arrived-card { border-left-color: var(--pending-gray); opacity: 0.85; }
+        .card { background: white; padding: 18px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; border-left: 6px solid transparent; }
+        .arrived-card { border-left-color: var(--bg-success); }
+        .not-arrived-card { border-left-color: var(--bg-pending); }
 
-        .status-badge { background: #e8f0fe; color: var(--primary-blue); font-size: 0.75em; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: bold; }
-        .not-arrived-badge { background: #eee; color: #666; }
+        /* 標籤：綠底白字 vs 灰底白字 */
+        .status-badge { font-size: 0.8em; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 10px; font-weight: bold; color: white; }
+        .badge-arrived { background-color: var(--bg-success); }
+        .badge-not-arrived { background-color: var(--bg-pending); }
 
-        .item-name { font-size: 1.15em; font-weight: bold; color: #333; margin-bottom: 6px; }
-        .item-info { color: #666; font-size: 0.9em; margin-bottom: 8px; }
-        .item-note { font-size: 0.85em; color: #888; background: #f9f9f9; padding: 4px 8px; border-radius: 4px; display: inline-block; }
-        .item-price-tag { position: absolute; right: 18px; bottom: 18px; font-weight: bold; color: #d93025; font-size: 1.2em; }
+        .item-name { font-size: 1.25em; font-weight: bold; color: #222; margin-bottom: 8px; }
+        .item-info { color: #666; font-size: 0.95em; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+        .item-note { font-size: 0.85em; color: #5c85d6; font-style: italic; display: flex; align-items: center; gap: 5px; }
+        .item-price-tag { position: absolute; right: 20px; bottom: 20px; font-weight: bold; color: #d32f2f; font-size: 1.3em; }
 
-        .empty-msg { text-align: center; padding: 25px; color: #aaa; background: white; border-radius: 12px; border: 1px dashed #ddd; }
+        .empty-msg { text-align: center; padding: 25px; color: #999; background: white; border-radius: 12px; border: 1px dashed #ccc; }
 
         /* 總結區塊 */
-        .total-container { margin-top: 30px; background: #202124; color: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #3c4043; }
+        .total-container { margin-top: 30px; background: #263238; color: white; border-radius: 15px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
+        .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #455a64; }
         
-        /* 已到貨金額重點顯示 */
-        .arrived-total-val { font-size: 1.6em; color: var(--gold-color); font-weight: 900; }
+        /* 已到貨金額重點顯示 (金色) */
+        .arrived-total-val { font-size: 1.7em; color: var(--gold-color); font-weight: 900; }
         
-        .total-row:last-child { border-bottom: none; border-top: 1px solid #555; padding-top: 15px; margin-top: 5px; }
-        .total-label { font-size: 0.9em; color: #aaa; }
-        .total-val { font-weight: bold; font-size: 1.1em; color: white; }
+        .total-row:last-child { border-bottom: none; border-top: 1px solid #546e7a; padding-top: 18px; margin-top: 5px; }
+        .total-label { font-size: 0.95em; color: #cfd8dc; }
+        .total-val { font-weight: bold; font-size: 1.15em; color: white; }
 
         .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .name-btn { padding: 12px 20px; background: white; border: 2px solid var(--primary-blue); border-radius: 25px; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 1em; }
+        .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 1em; transition: 0.2s; }
         .name-btn:hover { background: var(--primary-blue); color: white; }
     </style>
 </head>
@@ -143,7 +145,7 @@
         const resultDiv = document.getElementById('results');
         let stats = { arr: { i: 0, q: 0, t: 0 }, not: { i: 0, q: 0, t: 0 } };
         let arrHtml = `<div class="section-header header-arrived">✅ 已到貨商品 (待處理)</div>`;
-        let notHtml = `<div class="section-header header-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
+        let notHtml = `<div class="section-header header-not-arrived">⌛ 未到貨商品 (預購中)</div>`;
         
         let hasArr = false, hasNot = false;
 
@@ -159,12 +161,17 @@
             const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
             const isNot = note.includes("未到貨");
 
+            // 備註顯示邏輯：若不是「未到貨」才顯示標記
+            const showNoteText = (note !== "" && !isNot);
+
             const card = `
                 <div class="card ${isNot ? 'not-arrived-card' : 'arrived-card'}">
-                    <div class="status-badge ${isNot ? 'not-arrived-badge' : ''}">${isNot ? '待到貨' : '未取貨'}</div>
+                    <div class="status-badge ${isNot ? 'badge-not-arrived' : 'badge-arrived'}">
+                        ${isNot ? '未到貨' : '未取貨'}
+                    </div>
                     <div class="item-name">${itemName}</div>
                     <div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
-                    ${note ? `<div class="item-note">📝 備註: ${note}</div>` : ''}
+                    ${showNoteText ? `<div class="item-note">📝 備註: ${note}</div>` : ''}
                     <div class="item-price-tag">$${subtotal.toLocaleString()}</div>
                 </div>`;
 
@@ -175,9 +182,11 @@
             }
         }
 
-        const header = `<div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>`;
-        
-        // 總結區塊修改
+        const header = `
+            <div style="margin-bottom:15px; font-weight:bold; color:#1a73e8; display:flex; align-items:center; flex-wrap:wrap;">
+                <div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>
+            </div>`;
+
         const total = `
             <div class="total-container">
                 <div class="total-row">
@@ -189,7 +198,7 @@
                     <div class="total-val">$${stats.not.t.toLocaleString()}</div>
                 </div>
                 <div class="total-row">
-                    <div class="total-label">總金額</div>
+                    <div class="total-label">應付金額總計</div>
                     <div class="total-val">$${(stats.arr.t + stats.not.t).toLocaleString()}</div>
                 </div>
             </div>`;
@@ -201,4 +210,5 @@
 </script>
 </body>
 </html>
+
 
