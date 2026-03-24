@@ -7,40 +7,43 @@
     <style>
         :root {
             --primary-blue: #0d47a1;
-            --success-green: #2e7d32; /* 較深的綠色，用於文字 */
-            --bg-success: #34a853;    /* 標籤用的綠色 */
-            --bg-pending: #70757a;    /* 標籤用的灰色 */
+            --success-green: #2e7d32;
+            --pending-gray: #70757a;
+            --released-orange: #f57c00; /* 釋出商品用的橘色 */
+            --bg-success: #34a853;
+            --bg-pending: #70757a;
             --bg-color: #f0f4f8;
             --gold-color: #ffab00;
         }
-        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; }
+        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
         h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; font-weight: bold; }
         
         .search-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .search-box { display: flex; gap: 10px; }
         input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
-        button { padding: 12px 25px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        input:focus { border-color: var(--primary-blue); }
+        button { padding: 12px 25px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        button:hover { background-color: #0a3d8a; }
 
         .warning-text { color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 10px; background-color: #fff3e0; border-radius: 8px; font-weight: bold; }
 
-        /* 查詢結果標頭 */
         .query-id-header { display: flex; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; border-left: 6px solid var(--primary-blue); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .query-id-text { font-size: 1.5em; font-weight: 900; color: var(--primary-blue); margin-left: 10px; }
 
-        /* 狀態分區標頭 */
         .section-header { padding: 10px 15px; border-radius: 8px; font-weight: bold; margin: 25px 0 12px 0; font-size: 1.05em; display: flex; align-items: center; }
         .header-arrived { background-color: #e6f4ea; color: var(--success-green); border-left: 5px solid var(--success-green); }
         .header-not-arrived { background-color: #f1f3f4; color: #5f6368; border-left: 5px solid #5f6368; }
+        .header-released { background-color: #fff3e0; color: var(--released-orange); border-left: 5px solid var(--released-orange); margin-top: 40px; }
 
-        /* 商品卡片樣式 */
         .card { background: white; padding: 18px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; border-left: 6px solid transparent; }
         .arrived-card { border-left-color: var(--bg-success); }
         .not-arrived-card { border-left-color: var(--bg-pending); }
+        .released-card { border-left-color: var(--released-orange); border-style: dashed; } /* 惜物商品用虛線邊框 */
 
-        /* 標籤：綠底白字 vs 灰底白字 */
         .status-badge { font-size: 0.8em; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 10px; font-weight: bold; color: white; }
         .badge-arrived { background-color: var(--bg-success); }
         .badge-not-arrived { background-color: var(--bg-pending); }
+        .badge-released { background-color: var(--released-orange); }
 
         .item-name { font-size: 1.25em; font-weight: bold; color: #222; margin-bottom: 8px; }
         .item-info { color: #666; font-size: 0.95em; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
@@ -49,20 +52,18 @@
 
         .empty-msg { text-align: center; padding: 25px; color: #999; background: white; border-radius: 12px; border: 1px dashed #ccc; }
 
-        /* 總結區塊 */
         .total-container { margin-top: 30px; background: #263238; color: white; border-radius: 15px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
         .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #455a64; }
-        
-        /* 已到貨金額重點顯示 (金色) */
         .arrived-total-val { font-size: 1.7em; color: var(--gold-color); font-weight: 900; }
-        
         .total-row:last-child { border-bottom: none; border-top: 1px solid #546e7a; padding-top: 18px; margin-top: 5px; }
         .total-label { font-size: 0.95em; color: #cfd8dc; }
         .total-val { font-weight: bold; font-size: 1.15em; color: white; }
 
-        .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; }
         .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 1em; transition: 0.2s; }
         .name-btn:hover { background: var(--primary-blue); color: white; }
+
+        #releasedArea { margin-top: 40px; border-top: 2px solid #ddd; padding-top: 20px; }
     </style>
 </head>
 <body>
@@ -80,6 +81,8 @@
 
 <div id="selectionArea"></div>
 <div id="results"></div>
+
+<div id="releasedArea"></div>
 
 <script>
     const sheetId = '1pjTOojFm4-_rGpGGN9Nv31GCdYMPtSDQkfn8vbyBFLQ';
@@ -110,25 +113,91 @@
         return rows;
     }
 
-    async function searchNames() {
-        const query = document.getElementById('nameInput').value.trim().toLowerCase();
-        if (!query) return alert('請輸入關鍵字！');
-        const selectionArea = document.getElementById('selectionArea');
-        const resultDiv = document.getElementById('results');
-        selectionArea.innerHTML = ''; resultDiv.innerHTML = '';
-
+    // 初始化：網頁載入時自動讀取惜物專區
+    window.onload = async function() {
+        const releasedArea = document.getElementById('releasedArea');
+        releasedArea.innerHTML = '<p style="text-align:center; color:#999;">惜物專區載入中...</p>';
+        
         try {
             const response = await fetch(csvUrl);
             const csvText = await response.text();
             allRows = parseCSV(csvText);
+            showReleasedItems(); // 顯示惜物商品
+        } catch (e) {
+            releasedArea.innerHTML = ''; // 載入失敗則不顯示
+            console.error(e);
+        }
+    };
+
+    // 顯示惜物專區的邏輯
+    function showReleasedItems() {
+        const releasedArea = document.getElementById('releasedArea');
+        let releasedHtml = `<div class="section-header header-released">🔥 本日惜物專區 (跑單釋出)</div>`;
+        let hasReleased = false;
+
+        // 掃描全表，找出備註含「已釋出」的商品
+        for (let i = 1; i < allRows.length; i++) {
+            const row = allRows[i];
+            const note = (row[1] || "").trim();
+            const itemName = (row[3] || "").trim();
+            const status = (row[0] || "").trim().toUpperCase();
+
+            // 惜物邏輯：備註含「已釋出」 且 商品本身尚未被勾選「已取貨」 且 有商品名稱
+            if (note.includes("已釋出") && status !== "TRUE" && itemName !== "") {
+                const qty = parseInt((row[4] || "").trim()) || 0;
+                const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
+                const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
+
+                // 惜物卡片樣式：橘色色調
+                releasedHtml += `
+                    <div class="card released-card">
+                        <div class="status-badge badge-released">惜物商品</div>
+                        <div class="item-name">${itemName}</div>
+                        <div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
+                        ${note ? `<div class="item-note">📝 備註: ${note}</div>` : ''}
+                        <div class="item-price-tag">$${subtotal.toLocaleString()}</div>
+                    </div>`;
+                hasReleased = true;
+            }
+        }
+
+        if (hasReleased) {
+            releasedHtml += `<p style="text-align:center; color:#e67e22; font-size:0.9em; margin-top:15px;">※ 惜物商品數量有限，先到先得，請直接聯繫小編下單。</p>`;
+            releasedArea.innerHTML = releasedHtml;
+        } else {
+            releasedArea.innerHTML = ''; // 如果沒有釋出商品，則完全隱藏此區塊
+        }
+    }
+
+    async function searchNames() {
+        const query = document.getElementById('nameInput').value.trim().toLowerCase();
+        const selectionArea = document.getElementById('selectionArea');
+        const resultDiv = document.getElementById('results');
+        const releasedArea = document.getElementById('releasedArea');
+
+        if (!query) return alert('請輸入關鍵字！');
+        
+        selectionArea.innerHTML = ''; resultDiv.innerHTML = '';
+        releasedArea.innerHTML = ''; // 搜尋時隱藏惜物專區，讓畫面乾淨
+
+        try {
+            // 如果全表資料尚未讀取（例如初始化失敗），則重新讀取
+            if (allRows.length === 0) {
+                const response = await fetch(csvUrl);
+                const csvText = await response.text();
+                allRows = parseCSV(csvText);
+            }
+
             const matchedNames = new Set();
             for (let i = 1; i < allRows.length; i++) {
                 const customer = (allRows[i][2] || "").trim();
                 const status = (allRows[i][0] || "").trim().toUpperCase();
                 if (customer.toLowerCase().includes(query) && status !== "TRUE") matchedNames.add(customer);
             }
+
             if (matchedNames.size === 0) {
-                resultDiv.innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無待取貨紀錄。</div>`;
+                resultDiv.innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無符合「${document.getElementById('nameInput').value}」的待取貨紀錄。</div>`;
+                showReleasedItems(); // 查無結果時，重新顯示惜物專區
             } else if (matchedNames.size === 1) {
                 showDetails(Array.from(matchedNames)[0]);
             } else {
@@ -138,14 +207,16 @@
                 });
                 selectionArea.innerHTML = btnHtml + `</div>`;
             }
-        } catch (e) { alert('連線失敗！'); }
+        } catch (e) { alert('連線失敗！'); showReleasedItems(); }
     }
 
     function showDetails(targetName) {
         const resultDiv = document.getElementById('results');
+        const releasedArea = document.getElementById('releasedArea');
+        
         let stats = { arr: { i: 0, q: 0, t: 0 }, not: { i: 0, q: 0, t: 0 } };
         let arrHtml = `<div class="section-header header-arrived">✅ 已到貨商品 (待處理)</div>`;
-        let notHtml = `<div class="section-header header-not-arrived">⌛ 未到貨商品 (預購中)</div>`;
+        let notHtml = `<div class="section-header header-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
         
         let hasArr = false, hasNot = false;
 
@@ -161,36 +232,32 @@
             const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
             const isNot = note.includes("未到貨");
 
-            // 備註顯示邏輯：若不是「未到貨」才顯示標記
-            const showNoteText = (note !== "" && !isNot);
+            // 判斷是否為惜物商品（搜尋結果中也會標示）
+            const isReleased = note.includes("已釋出");
 
             const card = `
-                <div class="card ${isNot ? 'not-arrived-card' : 'arrived-card'}">
-                    <div class="status-badge ${isNot ? 'badge-not-arrived' : 'badge-arrived'}">
-                        ${isNot ? '未到貨' : '未取貨'}
+                <div class="card ${isReleased ? 'released-card' : (isNot ? 'not-arrived-card' : 'arrived-card')}">
+                    <div class="status-badge ${isReleased ? 'badge-released' : (isNot ? 'badge-not-arrived' : 'badge-arrived')}">
+                        ${isReleased ? '惜物release' : (isNot ? '未到貨' : '未取貨')}
                     </div>
                     <div class="item-name">${itemName}</div>
                     <div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
-                    ${showNoteText ? `<div class="item-note">📝 備註: ${note}</div>` : ''}
+                    ${note ? `<div class="item-note">📝 備註: ${note}</div>` : ''}
                     <div class="item-price-tag">$${subtotal.toLocaleString()}</div>
                 </div>`;
 
-            if (isNot) {
+            if (isNot && !isReleased) { // 未到貨且未釋出
                 notHtml += card; stats.not.i++; stats.not.q += qty; stats.not.t += subtotal; hasNot = true;
-            } else {
+            } else { // 已到貨 或 已釋出
                 arrHtml += card; stats.arr.i++; stats.arr.q += qty; stats.arr.t += subtotal; hasArr = true;
             }
         }
 
-        const header = `
-            <div style="margin-bottom:15px; font-weight:bold; color:#1a73e8; display:flex; align-items:center; flex-wrap:wrap;">
-                <div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>
-            </div>`;
-
+        const header = `<div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>`;
         const total = `
             <div class="total-container">
                 <div class="total-row">
-                    <div class="total-label">已到貨合計 (${stats.arr.i}品項 / ${stats.arr.q}件)</div>
+                    <div class="total-label">已到貨/惜物合計 (${stats.arr.i}品項 / ${stats.arr.q}件)</div>
                     <div class="arrived-total-val">$${stats.arr.t.toLocaleString()}</div>
                 </div>
                 <div class="total-row">
@@ -198,14 +265,15 @@
                     <div class="total-val">$${stats.not.t.toLocaleString()}</div>
                 </div>
                 <div class="total-row">
-                    <div class="total-label">應付金額總計</div>
-                    <div class="total-val">$${(stats.arr.t + stats.not.t).toLocaleString()}</div>
+                    <div class="total-label" style="color:white; font-size:1.1em;">應付金額總計</div>
+                    <div class="total-val grand-total">$${(stats.arr.t + stats.not.t).toLocaleString()}</div>
                 </div>
             </div>`;
 
         resultDiv.innerHTML = header + arrHtml + (hasArr ? '' : `<div class="empty-msg">目前無已到貨商品</div>`) + 
                               notHtml + (hasNot ? '' : `<div class="empty-msg">目前無未到貨商品</div>`) + total;
         document.getElementById('selectionArea').innerHTML = '';
+        releasedArea.innerHTML = ''; // 顯示明細時，隱藏首頁惜物專區
     }
 </script>
 </body>
