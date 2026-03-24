@@ -60,6 +60,7 @@
         .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 1em; }
 
         #releasedArea { margin-top: 40px; border-top: 2px solid #ddd; padding-top: 20px; }
+        .released-warning { text-align: center; color: #d35400; font-size: 0.9em; margin-top: 15px; font-weight: bold; line-height: 1.6; background: #fff; padding: 10px; border-radius: 10px; border: 1px dashed #e67e22; }
     </style>
 </head>
 <body>
@@ -109,7 +110,6 @@
     }
 
     window.onload = async function() {
-        const releasedArea = document.getElementById('releasedArea');
         try {
             const response = await fetch(csvUrl);
             const csvText = await response.text();
@@ -144,7 +144,15 @@
                 hasReleased = true;
             }
         }
-        releasedArea.innerHTML = hasReleased ? (releasedHtml + `<p style="text-align:center; color:#e67e22; font-size:0.9em; margin-top:15px;">※ 現貨數量有限，請直接聯繫小編搶購。</p>`) : '';
+        
+        // 修改：加入新的警語內容
+        const warning = `
+            <div class="released-warning">
+                📌 商品數量隨時變動，需要請 @版面小編<br>
+                確認後會幫您登記再來取貨，請勿棄單！
+            </div>`;
+            
+        releasedArea.innerHTML = hasReleased ? (releasedHtml + warning) : '';
     }
 
     async function searchNames() {
@@ -193,7 +201,6 @@
             const qty = parseInt(row[4]) || 0;
             const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
             const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
-            
             const isReleased = note.includes("釋出") || note.includes("多");
             const isNot = note.includes("未到貨");
             
