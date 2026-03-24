@@ -44,9 +44,10 @@
         .badge-released { background-color: var(--released-orange); }
 
         .item-name { font-size: 1.25em; font-weight: bold; color: #222; margin-bottom: 8px; }
-        .item-info { color: #666; font-size: 0.95em; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-        .item-note { font-size: 0.85em; color: #5c85d6; font-style: italic; display: flex; align-items: center; gap: 5px; }
-        .item-price-tag { position: absolute; right: 20px; bottom: 20px; font-weight: bold; color: #d32f2f; font-size: 1.3em; }
+        .item-info { color: #666; font-size: 0.95em; margin-bottom: 5px; }
+        .item-price-tag { position: absolute; right: 20px; bottom: 15px; font-weight: bold; color: #d32f2f; font-size: 1.3em; }
+
+        .empty-msg { text-align: center; padding: 25px; color: #999; background: white; border-radius: 12px; border: 1px dashed #ccc; }
 
         .total-container { margin-top: 30px; background: #263238; color: white; border-radius: 15px; padding: 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.2); }
         .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #455a64; }
@@ -128,21 +129,16 @@
             const itemName = (row[3] || "").trim();
             const status = (row[0] || "").trim().toUpperCase();
 
-            // 邏輯修改：包含「釋出」或「多」
             if ((note.includes("釋出") || note.includes("多")) && status !== "TRUE" && itemName !== "") {
                 const qty = parseInt((row[4] || "").trim()) || 0;
                 const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
                 const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
                 
-                // 移除備註中的「釋出」字樣供顯示用
-                const displayNote = note.replace(/釋出/g, '').replace(/,/g, '').trim();
-
                 releasedHtml += `
                     <div class="card released-card">
                         <div class="status-badge badge-released">好康現貨</div>
                         <div class="item-name">${itemName}</div>
                         <div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
-                        ${displayNote ? `<div class="item-note">📝 備註: ${displayNote}</div>` : ''}
                         <div class="item-price-tag">$${subtotal.toLocaleString()}</div>
                     </div>`;
                 hasReleased = true;
@@ -201,9 +197,6 @@
             const isReleased = note.includes("釋出") || note.includes("多");
             const isNot = note.includes("未到貨");
             
-            // 顯示備註過濾「釋出」
-            const displayNote = note.replace(/釋出/g, '').replace(/,/g, '').trim();
-
             const card = `
                 <div class="card ${isReleased ? 'released-card' : (isNot ? 'not-arrived-card' : 'arrived-card')}">
                     <div class="status-badge ${isReleased ? 'badge-released' : (isNot ? 'badge-not-arrived' : 'badge-arrived')}">
@@ -211,7 +204,6 @@
                     </div>
                     <div class="item-name">${itemName}</div>
                     <div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
-                    ${(displayNote && !isNot) ? `<div class="item-note">📝 備註: ${displayNote}</div>` : ''}
                     <div class="item-price-tag">$${subtotal.toLocaleString()}</div>
                 </div>`;
 
@@ -238,5 +230,3 @@
 </script>
 </body>
 </html>
-
-
