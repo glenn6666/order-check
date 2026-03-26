@@ -17,32 +17,26 @@
         body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
         h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; font-weight: bold; }
         
-        /* 網頁顯示組件 */
+        /* 網頁顯示樣式 */
         .search-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .search-box { display: flex; gap: 10px; }
         input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
         button { padding: 12px 25px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .warning-text { color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 10px; background-color: #fff3e0; border-radius: 8px; font-weight: bold; }
 
-        /* 查詢結果樣式 */
         .query-id-header { display: flex; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; border-left: 6px solid var(--primary-blue); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .query-id-text { font-size: 1.5em; font-weight: 900; color: var(--primary-blue); margin-left: 10px; }
 
         .section-header { padding: 10px 15px; border-radius: 8px; font-weight: bold; margin: 25px 0 12px 0; font-size: 1.05em; display: flex; align-items: center; }
         .header-arrived { background-color: #e6f4ea; color: var(--success-green); border-left: 5px solid var(--success-green); }
         .header-not-arrived { background-color: #f1f3f4; color: #5f6368; border-left: 5px solid #5f6368; }
-        .header-released { background-color: #fff3e0; color: var(--released-orange); border-left: 5px solid var(--released-orange); margin-top: 40px; }
 
         .card { background: white; padding: 18px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; border-left: 6px solid transparent; }
         .arrived-card { border-left-color: var(--bg-success); }
         .not-arrived-card { border-left-color: var(--bg-pending); }
-        .released-card { border-left-color: var(--released-orange); border-style: solid; }
-
         .status-badge { font-size: 0.8em; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 10px; font-weight: bold; color: white; }
         .badge-arrived { background-color: var(--bg-success); }
         .badge-not-arrived { background-color: var(--bg-pending); }
-        .badge-released { background-color: var(--released-orange); }
-
         .item-name { font-size: 1.25em; font-weight: bold; color: #222; margin-bottom: 8px; }
         .item-info { color: #666; font-size: 0.95em; margin-bottom: 5px; }
         .item-price-tag { position: absolute; right: 20px; bottom: 15px; font-weight: bold; color: #d32f2f; font-size: 1.3em; }
@@ -55,57 +49,99 @@
 
         .print-btn { width: 100%; margin: 20px 0; padding: 15px; background-color: #455a64; color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-        /* 現貨專區特別強化樣式 */
-        .released-item-name { font-size: 1.4em; font-weight: 900; color: #111; margin-bottom: 10px; padding-right: 100px; line-height: 1.3; }
-        .highlight-price { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-blue); font-size: 1.8em; font-weight: 900; }
-        .highlight-qty { color: #444; font-size: 1.1em; font-weight: bold; background: #f0f0f0; padding: 4px 10px; border-radius: 6px; }
-        #releasedArea { margin-top: 40px; border-top: 2px solid #ddd; padding-top: 20px; }
-        .released-warning { text-align: center; color: #d35400; font-size: 0.9em; margin-top: 15px; font-weight: bold; line-height: 1.6; background: #fff; padding: 10px; border-radius: 10px; border: 1px dashed #e67e22; }
-        .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; }
-        .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 1em; }
-
         /* ----------------------------------------------
-           熱感應紙列印優化樣式 (80mm 全滿)
+           熱感應紙列印優化 (新細明體、清單模式、全滿)
         ---------------------------------------------- */
         @media print {
             @page { size: 80mm auto; margin: 0; }
-            body { background: white; padding: 0; width: 80mm; margin: 0; color: #000 !important; }
+            body { 
+                background: white; 
+                padding: 0; 
+                width: 80mm; 
+                margin: 0; 
+                color: #000 !important; 
+                font-family: "新細明體", "PMingLiU", serif !important; /* 強制使用新細明體 */
+            }
             
-            /* 隱藏不必要資訊 */
+            /* 隱藏網頁元素 */
             h2, .search-container, .warning-text, .name-selector, .print-btn, 
-            .released-warning, .header-released, #releasedArea, 
-            .header-not-arrived, .not-arrived-section { display: none !important; }
+            .released-warning, #releasedArea, .section-header, .header-not-arrived, .not-arrived-section, .status-badge { display: none !important; }
             
-            /* ID 標頭緊湊化 */
-            .query-id-header { border: 1.5px solid #000; padding: 2mm 3mm; margin-bottom: 2mm; border-radius: 0; box-shadow: none; border-left-width: 1.5px; }
-            .query-id-text { color: #000 !important; font-size: 1.2em; }
-            .section-header { padding: 1mm 2mm; margin: 2mm 0; border-radius: 0; border: 1px solid #000; background: #eee !important; color: #000 !important; }
+            /* ID 標頭 */
+            .query-id-header { 
+                border: none; 
+                border-bottom: 2px solid #000; 
+                padding: 2mm 0; 
+                margin-bottom: 2mm; 
+                border-radius: 0; 
+                box-shadow: none;
+                display: block !important;
+            }
+            .query-id-text { color: #000 !important; font-size: 1.4em; font-weight: bold; }
 
-            /* 卡片全滿且縮減空白 */
+            /* 已到貨標題 */
+            .header-arrived { 
+                display: block !important; 
+                background: none !important; 
+                color: #000 !important; 
+                border: none !important; 
+                border-bottom: 1px solid #000 !important;
+                padding: 1mm 0 !important;
+                margin: 0 0 2mm 0 !important;
+                font-size: 1.1em !important;
+            }
+
+            /* 商品清單明細 (取消方框) */
             .card { 
-                box-shadow: none; border: 1px solid #000; 
-                margin-bottom: 2mm; padding: 2mm; 
-                border-radius: 0; border-left-width: 1px; 
-                page-break-inside: avoid; width: 100%; box-sizing: border-box; 
+                display: block !important;
+                background: none !important;
+                border: none !important;
+                border-bottom: 1px dashed #ccc !important;
+                box-shadow: none !important;
+                margin: 0 0 1mm 0 !important;
+                padding: 1mm 0 !important;
+                width: 100% !important;
+                border-radius: 0 !important;
             }
-            .status-badge { background: #000 !important; color: #fff !important; padding: 1px 4px; margin-bottom: 1mm; border-radius: 0; }
-            .item-name { font-size: 1.1em; margin-bottom: 1mm; line-height: 1.2; }
-            .item-info { font-size: 0.9em; margin-bottom: 1mm; padding-bottom: 1mm; border-bottom: 1px dashed #000; }
+            .item-name { font-size: 1.1em !important; margin-bottom: 0.5mm !important; color: #000 !important; }
+            .item-info { 
+                font-size: 0.95em !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                border: none !important; 
+                color: #000 !important;
+            }
             
-            /* 金額置底右對齊 */
-            .item-price-tag { color: #000 !important; position: static; text-align: right; margin-top: 1mm; font-size: 1.1em; display: block; }
-            
-            /* 總計區塊緊湊化 */
+            /* 金額對齊 */
+            .item-price-tag { 
+                position: relative !important; 
+                display: block !important;
+                text-align: right !important; 
+                right: 0 !important; 
+                bottom: 0 !important; 
+                font-size: 1.1em !important; 
+                color: #000 !important;
+                margin-top: -4mm !important; /* 讓金額移到跟資訊同一行或下方緊貼 */
+            }
+
+            /* 總計區塊 */
             .total-container { 
-                background: white !important; color: #000 !important; 
-                border: 2px solid #000; border-radius: 0; 
-                padding: 3mm; margin-top: 2mm; width: 100%; box-sizing: border-box; 
+                background: none !important; 
+                color: #000 !important; 
+                border: none !important;
+                border-top: 2px solid #000 !important;
+                padding: 2mm 0 !important; 
+                margin-top: 3mm !important;
             }
-            .total-row { border-bottom: 1px dashed #000 !important; padding: 1mm 0; margin-bottom: 1mm; }
-            .total-row.not-arrived-summary { display: none !important; } /* 列印不顯示未到貨總計 */
-            .total-label { font-size: 0.9em; color: #000 !important; }
-            .total-val, .arrived-total-val { color: #000 !important; font-size: 1.2em; }
+            .total-row { border-bottom: 1px solid #000 !important; padding: 1mm 0 !important; }
+            .total-row.not-arrived-summary { display: none !important; }
+            .total-label { font-size: 1em !important; color: #000 !important; }
+            .total-val, .arrived-total-val { color: #000 !important; font-size: 1.3em !important; font-weight: bold !important; }
         }
+
+        /* 為了確保列印時正確隱藏 */
+        .not-arrived-section { display: block; }
+        .arrived-section { display: block; }
     </style>
 </head>
 <body>
@@ -180,15 +216,14 @@
                 releasedHtml += `
                     <div class="card released-card">
                         <div class="status-badge badge-released">好康現貨</div>
-                        <div class="released-item-name">${itemName}</div>
-                        <div class="released-info"><span class="highlight-qty">剩餘數量: ${qty}</span></div>
-                        <div class="highlight-price">$${price.toLocaleString()}</div>
+                        <div class="item-name">${itemName}</div>
+                        <div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
+                        <div class="item-price-tag">$${subtotal.toLocaleString()}</div>
                     </div>`;
                 hasReleased = true;
             }
         }
-        const warning = `<div class="released-warning">📌 商品數量隨時變動，需要請 @版面小編<br>確認後會幫您登記再來取貨，請勿棄單！</div>`;
-        releasedArea.innerHTML = hasReleased ? (releasedHtml + warning) : '';
+        releasedArea.innerHTML = hasReleased ? releasedHtml : '';
     }
 
     async function searchNames() {
@@ -196,7 +231,6 @@
         if (!query) return alert('請輸入關鍵字！');
         document.getElementById('selectionArea').innerHTML = ''; 
         document.getElementById('results').innerHTML = '';
-        document.getElementById('releasedArea').innerHTML = '';
         try {
             const matchedNames = new Set();
             for (let i = 1; i < allRows.length; i++) {
@@ -206,7 +240,6 @@
             }
             if (matchedNames.size === 0) {
                 document.getElementById('results').innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無待取貨紀錄。</div>`;
-                showReleasedItems();
             } else if (matchedNames.size === 1) {
                 showDetails(Array.from(matchedNames)[0]);
             } else {
@@ -216,13 +249,13 @@
                 });
                 document.getElementById('selectionArea').innerHTML = btnHtml + `</div>`;
             }
-        } catch (e) { showReleasedItems(); }
+        } catch (e) { }
     }
 
     function showDetails(targetName) {
         let stats = { arr: { i: 0, q: 0, t: 0 }, not: { i: 0, q: 0, t: 0 } };
-        let arrHtml = `<div class="section-header header-arrived arrived-section">✅ 已到貨商品 (待處理)</div><div class="arrived-section">`;
-        let notHtml = `<div class="section-header header-not-arrived not-arrived-section">⏳ 未到貨商品 (待通知)</div><div class="not-arrived-section">`;
+        let arrHtml = `<div class="header-arrived arrived-section">✅ 已到貨商品 (待處理)</div><div class="arrived-section">`;
+        let notHtml = `<div class="header-not-arrived not-arrived-section">⏳ 未到貨商品 (待通知)</div><div class="not-arrived-section">`;
         let hasArr = false, hasNot = false;
 
         for (let i = 1; i < allRows.length; i++) {
