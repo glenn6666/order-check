@@ -44,12 +44,9 @@
         .badge-released { background-color: var(--released-orange); }
 
         .item-name { font-size: 1.25em; font-weight: bold; color: #222; margin-bottom: 8px; }
-        
-        /* 查詢明細的資訊樣式 */
         .item-info { color: #666; font-size: 0.95em; margin-bottom: 5px; }
         .item-price-tag { position: absolute; right: 20px; bottom: 15px; font-weight: bold; color: #d32f2f; font-size: 1.3em; }
 
-        /* 現貨專區特別強化的單價數量樣式 */
         .released-info { display: flex; gap: 20px; align-items: center; margin-top: 5px; }
         .highlight-price { color: var(--primary-blue); font-size: 1.3em; font-weight: 900; }
         .highlight-qty { color: #444; font-size: 1.1em; font-weight: bold; background: #eee; padding: 2px 8px; border-radius: 5px; }
@@ -89,7 +86,8 @@
 
 <script>
     const sheetId = '1pjTOojFm4-_rGpGGN9Nv31GCdYMPtSDQkfn8vbyBFLQ';
-    const gid = '171915529';
+    // 已更新：對應您提供的 gid=1505777704
+    const gid = '1505777704';
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
     let allRows = [];
 
@@ -140,7 +138,6 @@
                 const qty = parseInt((row[4] || "").trim()) || 0;
                 const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
                 
-                // 修改：現貨專區強化單價與數量，移除小計
                 releasedHtml += `
                     <div class="card released-card">
                         <div class="status-badge badge-released">好康現貨</div>
@@ -212,7 +209,6 @@
             const isReleased = note.includes("釋出") || note.includes("多");
             const isNot = note.includes("未到貨");
             
-            // 明細部分維持原有小計顯示
             const card = `
                 <div class="card ${isReleased ? 'released-card' : (isNot ? 'not-arrived-card' : 'arrived-card')}">
                     <div class="status-badge ${isReleased ? 'badge-released' : (isNot ? 'badge-not-arrived' : 'badge-arrived')}">
