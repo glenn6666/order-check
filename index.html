@@ -18,7 +18,6 @@
         body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
         h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; font-weight: bold; }
         
-        /* 介面組件 */
         .search-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .search-box { display: flex; gap: 10px; }
         input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
@@ -26,7 +25,6 @@
 
         .warning-text { color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 10px; background-color: #fff3e0; border-radius: 8px; font-weight: bold; }
 
-        /* 查詢結果樣式 */
         .query-id-header { display: flex; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; border-left: 6px solid var(--primary-blue); margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
         .query-id-text { font-size: 1.5em; font-weight: 900; color: var(--primary-blue); margin-left: 10px; }
 
@@ -55,26 +53,32 @@
         .total-row:last-child { border-bottom: none; border-top: 1px solid #546e7a; padding-top: 18px; margin-top: 5px; }
         .total-val { font-weight: bold; font-size: 1.15em; color: white; }
 
-        /* 列印按鈕樣式 */
         .print-btn { width: 100%; margin: 20px 0; padding: 15px; background-color: #455a64; color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .print-btn:hover { background-color: #263238; }
 
         /* ----------------------------------------------
-           列印專用樣式 (針對 80mm 紙捲)
+           列印專用樣式 (只列印已到貨)
         ---------------------------------------------- */
         @media print {
             @page { size: 80mm auto; margin: 0; }
-            body { background: white; padding: 5mm; width: 70mm; margin: 0 auto; }
-            h2, .search-container, .warning-text, .name-selector, .print-btn, .released-warning, .header-released, #releasedArea { display: none !important; }
-            .card { box-shadow: none; border: 1px solid #eee; margin-bottom: 5mm; page-break-inside: avoid; }
-            .total-container { background: white !important; color: black !important; border: 2px solid black; box-shadow: none; }
-            .total-row { border-bottom: 1px dashed black !important; }
+            body { background: white; padding: 5mm; width: 70mm; margin: 0 auto; color: black !important; }
+            /* 隱藏：未到貨區塊、搜尋框、警語、按鈕 */
+            h2, .search-container, .warning-text, .name-selector, .print-btn, 
+            .released-warning, .header-released, #releasedArea, 
+            .header-not-arrived, .not-arrived-section { display: none !important; }
+            
+            .card { box-shadow: none; border: 1px solid #000; margin-bottom: 3mm; page-break-inside: avoid; }
+            .status-badge { background: black !important; color: white !important; border: 1px solid black; }
+            .item-price-tag { color: black !important; border-top: 1px dashed #ccc; padding-top: 2mm; width: 100%; position: static; text-align: right; margin-top: 2mm; }
+            
+            .total-container { background: white !important; color: black !important; border: 2px solid black; box-shadow: none; margin-top: 5mm; }
+            .total-row { border-bottom: 1px dashed black !important; padding: 2mm 0; }
+            /* 列印時隱藏總計中的未到貨明細，只留已到貨跟應付金額 */
+            .total-row.not-arrived-summary { display: none !important; }
             .total-label, .total-val, .arrived-total-val { color: black !important; }
-            .query-id-header { border: 2px solid black; box-shadow: none; }
+            .query-id-header { border: 2px solid black; box-shadow: none; margin-bottom: 5mm; }
             .query-id-text { color: black !important; }
         }
 
-        /* 原有現貨專區樣式 */
         .released-item-name { font-size: 1.4em; font-weight: 900; color: #111; margin-bottom: 10px; padding-right: 100px; line-height: 1.3; }
         .released-info { margin-top: 5px; }
         .highlight-price { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: var(--primary-blue); font-size: 1.8em; font-weight: 900; }
@@ -154,7 +158,6 @@
             if ((note.includes("釋出") || note.includes("多")) && status !== "TRUE" && itemName !== "") {
                 const qty = parseInt((row[4] || "").trim()) || 0;
                 const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
-                
                 releasedHtml += `
                     <div class="card released-card">
                         <div class="status-badge badge-released">好康現貨</div>
@@ -165,7 +168,6 @@
                 hasReleased = true;
             }
         }
-        
         const warning = `<div class="released-warning">📌 商品數量隨時變動，需要請 @版面小編<br>確認後會幫您登記再來取貨，請勿棄單！</div>`;
         releasedArea.innerHTML = hasReleased ? (releasedHtml + warning) : '';
     }
@@ -176,7 +178,6 @@
         document.getElementById('selectionArea').innerHTML = ''; 
         document.getElementById('results').innerHTML = '';
         document.getElementById('releasedArea').innerHTML = '';
-
         try {
             const matchedNames = new Set();
             for (let i = 1; i < allRows.length; i++) {
@@ -184,7 +185,6 @@
                 const status = (allRows[i][0] || "").trim().toUpperCase();
                 if (customer.toLowerCase().includes(query) && status !== "TRUE") matchedNames.add(customer);
             }
-
             if (matchedNames.size === 0) {
                 document.getElementById('results').innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無待取貨紀錄。</div>`;
                 showReleasedItems();
@@ -202,8 +202,8 @@
 
     function showDetails(targetName) {
         let stats = { arr: { i: 0, q: 0, t: 0 }, not: { i: 0, q: 0, t: 0 } };
-        let arrHtml = `<div class="section-header header-arrived">✅ 已到貨商品 (待處理)</div>`;
-        let notHtml = `<div class="section-header header-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
+        let arrHtml = `<div class="section-header header-arrived arrived-section">✅ 已到貨商品 (待處理)</div><div class="arrived-section">`;
+        let notHtml = `<div class="section-header header-not-arrived not-arrived-section">⏳ 未到貨商品 (待通知)</div><div class="not-arrived-section">`;
         let hasArr = false, hasNot = false;
 
         for (let i = 1; i < allRows.length; i++) {
@@ -235,23 +235,21 @@
                 arrHtml += card; stats.arr.i++; stats.arr.q += qty; stats.arr.t += subtotal; hasArr = true;
             }
         }
+        arrHtml += `</div>`; notHtml += `</div>`;
 
         const header = `<div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>`;
-        
-        // 加入列印按鈕
-        const printBtn = `<button class="print-btn" onclick="window.print()">🖨️ 列印此明細 (8cm 紙捲)</button>`;
+        const printBtn = `<button class="print-btn" onclick="window.print()">🖨️ 只列印「已到貨」明細</button>`;
         
         const total = `
             <div class="total-container">
                 <div class="total-row"><div class="total-label">已到貨合計</div><div class="arrived-total-val">$${stats.arr.t.toLocaleString()}</div></div>
-                <div class="total-row"><div class="total-label">未到貨合計</div><div class="total-val">$${stats.not.t.toLocaleString()}</div></div>
+                <div class="total-row not-arrived-summary"><div class="total-label">未到貨合計</div><div class="total-val">$${stats.not.t.toLocaleString()}</div></div>
                 <div class="total-row"><div class="total-label">應付金額總計</div><div class="total-val">$${(stats.arr.t + stats.not.t).toLocaleString()}</div></div>
             </div>`;
 
-        document.getElementById('results').innerHTML = header + arrHtml + (hasArr ? '' : `<div class="empty-msg">無已到貨商品</div>`) + 
-                              notHtml + (hasNot ? '' : `<div class="empty-msg">無未到貨商品</div>`) + printBtn + total;
+        document.getElementById('results').innerHTML = header + arrHtml + (hasArr ? '' : `<div class="empty-msg arrived-section">無已到貨商品</div>`) + 
+                              notHtml + (hasNot ? '' : `<div class="empty-msg not-arrived-section">無未到貨商品</div>`) + printBtn + total;
         document.getElementById('selectionArea').innerHTML = '';
-        document.getElementById('releasedArea').innerHTML = '';
     }
 </script>
 </body>
