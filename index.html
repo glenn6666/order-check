@@ -15,7 +15,7 @@
             --bg-color: #f0f4f8;
             --gold-color: #ffab00;
         }
-        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
+        body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
         h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; font-weight: bold; }
         
         /* 網頁顯示樣式 */
@@ -49,34 +49,65 @@
         .total-row:last-child { border-bottom: none; border-top: 1px solid #546e7a; padding-top: 18px; margin-top: 5px; }
         .total-val { font-weight: bold; font-size: 1.15em; color: white; }
 
-        /* 按鈕樣式 */
         .print-btn { width: 100%; margin: 20px 0; padding: 15px; background-color: #455a64; color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; }
-        .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; font-size: 1em; }
 
         /* ----------------------------------------------
-           圖片生成專用區塊 (平常隱藏)
+           【生成圖片專用區塊】強化字體大小
         ---------------------------------------------- */
         #captureArea {
             position: absolute;
             left: -9999px;
-            top: 0;
-            width: 500px; /* 固定寬度模擬 8cm 紙捲 */
+            width: 500px; /* 模擬 80mm 紙張寬度 */
             background: white;
             color: black;
-            padding: 20px;
+            padding: 10px;
             font-family: "新細明體", "PMingLiU", serif;
         }
-        .img-item { border-bottom: 1px dashed black; padding: 10px 0; }
-        .img-id { font-size: 24px; font-weight: bold; border-bottom: 2px solid black; padding-bottom: 5px; margin-bottom: 10px; }
-        .img-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-        .img-price { text-align: right; font-size: 18px; font-weight: bold; }
-        .img-total { border-top: 2px solid black; margin-top: 15px; padding-top: 10px; font-size: 20px; font-weight: bold; }
+        .img-header-id { 
+            font-size: 32px; /* 放大 ID */
+            font-weight: bold; 
+            border-bottom: 3px solid black; 
+            padding: 5px 0;
+            margin-bottom: 5px;
+        }
+        .img-header-title { 
+            font-size: 24px; 
+            font-weight: bold; 
+            margin-bottom: 10px;
+            text-decoration: underline;
+        }
+        .img-item-row { 
+            border-bottom: 1px dashed black; 
+            padding: 8px 0; 
+            display: flex;
+            flex-direction: column;
+        }
+        .img-item-name { 
+            font-size: 24px; /* 商品名稱加大 */
+            font-weight: bold; 
+            line-height: 1.2;
+        }
+        .img-item-details { 
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 5px;
+        }
+        .img-item-price-qty { font-size: 20px; }
+        .img-item-subtotal { font-size: 26px; font-weight: bold; }
+
+        .img-footer-total { 
+            border-top: 3px solid black; 
+            margin-top: 15px; 
+            padding-top: 10px; 
+            font-size: 30px; /* 總計超大 */
+            font-weight: bold; 
+            text-align: right;
+        }
 
         #imageOutput { text-align: center; margin-top: 20px; border: 2px dashed #ccc; padding: 10px; background: #fff; display: none; }
-        #imageOutput img { max-width: 100%; border: 1px solid #000; }
-        .img-hint { color: #d32f2f; font-weight: bold; margin-bottom: 10px; font-size: 0.9em; }
+        #imageOutput img { width: 100%; border: 1px solid #000; }
+        .img-hint { color: #d32f2f; font-weight: bold; margin-bottom: 10px; font-size: 1.1em; }
     </style>
 </head>
 <body>
@@ -85,7 +116,7 @@
 
 <div class="search-container">
     <div class="search-box">
-        <input type="text" id="nameInput" placeholder="輸入名字關鍵字 (例: 阿勝)">
+        <input type="text" id="nameInput" placeholder="輸入名字關鍵字">
         <button onclick="searchNames()">搜尋</button>
     </div>
 </div>
@@ -94,8 +125,9 @@
 
 <div id="selectionArea"></div>
 <div id="results"></div>
+
 <div id="imageOutput">
-    <div class="img-hint">▼ 下方圖片已生成，請長按圖片儲存或分享 ▼</div>
+    <div class="img-hint">▼ 下方圖片已生成，請點擊分享或儲存 ▼</div>
     <div id="imageContainer"></div>
 </div>
 
@@ -145,27 +177,19 @@
         const releasedArea = document.getElementById('releasedArea');
         let releasedHtml = `<div class="section-header header-released" style="background-color: #fff3e0; color: #f57c00; border-left: 5px solid #f57c00;">🎁 團購好康現貨專區</div>`;
         let hasReleased = false;
-
         for (let i = 1; i < allRows.length; i++) {
             const row = allRows[i];
             const note = (row[1] || "").trim();
             const itemName = (row[3] || "").trim();
             const status = (row[0] || "").trim().toUpperCase();
-
             if ((note.includes("釋出") || note.includes("多")) && status !== "TRUE" && itemName !== "") {
                 const qty = (row[4] || "").trim();
                 const price = (row[5] || "0");
-                releasedHtml += `
-                    <div class="card" style="border-left-color: #f57c00;">
-                        <div class="status-badge" style="background-color: #f57c00;">好康現貨</div>
-                        <div class="item-name">${itemName}</div>
-                        <div class="item-info">單價: $${price} | 數量: ${qty}</div>
-                    </div>`;
+                releasedHtml += `<div class="card" style="border-left-color: #f57c00;"><div class="status-badge" style="background-color: #f57c00;">好康現貨</div><div class="item-name">${itemName}</div><div class="item-info">單價: $${price} | 數量: ${qty}</div></div>`;
                 hasReleased = true;
             }
         }
-        const warning = `<div class="released-warning">📌 商品數量隨時變動，需要請 @版面小編<br>確認後會幫您登記再來取貨，請勿棄單！</div>`;
-        releasedArea.innerHTML = hasReleased ? (releasedHtml + warning) : '';
+        releasedArea.innerHTML = hasReleased ? releasedHtml : '';
     }
 
     async function searchNames() {
@@ -182,21 +206,18 @@
                 const status = (allRows[i][0] || "").trim().toUpperCase();
                 if (customer.toLowerCase().includes(query) && status !== "TRUE") matchedNames.add(customer);
             }
-
             if (matchedNames.size === 0) {
                 document.getElementById('results').innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無待取貨紀錄。</div>`;
-                showReleasedItems();
             } else if (matchedNames.size === 1) {
                 showDetails(Array.from(matchedNames)[0]);
             } else {
-                let btnHtml = `<p style="color:#555; margin-bottom:10px;">請選擇您的名稱：</p><div class="name-selector">`;
+                let btnHtml = `<p style="color:#555; margin-bottom:10px;">請選擇您的正確名稱：</p><div class="name-selector">`;
                 matchedNames.forEach(name => {
                     btnHtml += `<button class="name-btn" onclick="showDetails('${name.replace(/'/g, "\\'")}')">${name}</button>`;
                 });
                 document.getElementById('selectionArea').innerHTML = btnHtml + `</div>`;
-                document.getElementById('releasedArea').innerHTML = '';
             }
-        } catch (e) { showReleasedItems(); }
+        } catch (e) { }
     }
 
     function showDetails(targetName) {
@@ -204,8 +225,7 @@
         let arrHtml = `<div class="section-header header-arrived">✅ 已到貨商品 (待處理)</div>`;
         let notHtml = `<div class="section-header header-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
         
-        // 準備圖片內容的變數
-        let imgContent = `<div class="img-id">查詢 ID: ${targetName}</div><div class="img-title">✅ 已到貨明細</div>`;
+        let imgContent = `<div class="img-header-id">查詢 ID: ${targetName}</div><div class="img-header-title">已到貨明細</div>`;
 
         for (let i = 1; i < allRows.length; i++) {
             const row = allRows[i];
@@ -219,40 +239,22 @@
             const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
             const isNot = note.includes("未到貨");
             
-            const card = `
-                <div class="card ${isNot ? 'not-arrived-card' : 'arrived-card'}">
-                    <div class="status-badge ${isNot ? 'badge-not-arrived' : 'badge-arrived'}">${isNot ? '未到貨' : '未取貨'}</div>
-                    <div class="item-name">${itemName}</div>
-                    <div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
-                    <div class="item-price-tag">$${subtotal.toLocaleString()}</div>
-                </div>`;
+            const card = `<div class="card ${isNot ? 'not-arrived-card' : 'arrived-card'}"><div class="status-badge ${isNot ? 'badge-not-arrived' : 'badge-arrived'}">${isNot ? '未到貨' : '未取貨'}</div><div class="item-name">${itemName}</div><div class="item-info">單價: $${price.toLocaleString()} | 數量: ${qty}</div><div class="item-price-tag">$${subtotal.toLocaleString()}</div></div>`;
 
             if (isNot) {
                 notHtml += card; stats.not.t += subtotal;
             } else {
                 arrHtml += card; stats.arr.t += subtotal;
-                // 加入圖片區 (只加已到貨)
-                imgContent += `
-                    <div class="img-item">
-                        <div>${itemName}</div>
-                        <div style="font-size: 14px;">$${price.toLocaleString()} x ${qty}</div>
-                        <div class="img-price">$${subtotal.toLocaleString()}</div>
-                    </div>`;
+                imgContent += `<div class="img-item-row"><div class="img-item-name">${itemName}</div><div class="img-item-details"><div class="img-item-price-qty">$${price.toLocaleString()} x ${qty}</div><div class="img-item-subtotal">$${subtotal.toLocaleString()}</div></div></div>`;
             }
         }
 
-        imgContent += `<div class="img-total">已到貨合計：$${stats.arr.t.toLocaleString()}</div>`;
+        imgContent += `<div class="img-footer-total">已到貨合計：$${stats.arr.t.toLocaleString()}</div>`;
         document.getElementById('captureArea').innerHTML = imgContent;
 
         const header = `<div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>`;
-        const actionBtn = `<button class="print-btn" onclick="generateImage()">🖼️ 生成圖片</button>`;
-        
-        const total = `
-            <div class="total-container">
-                <div class="total-row"><div>已到貨合計</div><div class="arrived-total-val">$${stats.arr.t.toLocaleString()}</div></div>
-                <div class="total-row"><div>未到貨合計</div><div class="total-val">$${stats.not.t.toLocaleString()}</div></div>
-                <div class="total-row"><div>應付金額總計</div><div class="total-val">$${(stats.arr.t + stats.not.t).toLocaleString()}</div></div>
-            </div>`;
+        const actionBtn = `<button class="print-btn" onclick="generateImage()">🖼️ 列印 (生成大字圖片)</button>`;
+        const total = `<div class="total-container"><div class="total-row"><div>已到貨合計</div><div class="arrived-total-val">$${stats.arr.t.toLocaleString()}</div></div><div class="total-row"><div>未到貨合計</div><div class="total-val">$${stats.not.t.toLocaleString()}</div></div><div class="total-row"><div>應付金額總計</div><div class="total-val">$${(stats.arr.t + stats.not.t).toLocaleString()}</div></div></div>`;
 
         document.getElementById('results').innerHTML = header + arrHtml + notHtml + actionBtn + total;
         document.getElementById('selectionArea').innerHTML = '';
@@ -264,23 +266,21 @@
         const output = document.getElementById('imageOutput');
         const container = document.getElementById('imageContainer');
         
-        // 顯示載入中
-        container.innerHTML = "正在生成圖片中，請稍候...";
+        container.innerHTML = "正在生成大字圖片中...";
         output.style.display = 'block';
         window.scrollTo(0, document.body.scrollHeight);
 
         try {
             const canvas = await html2canvas(area, {
                 backgroundColor: "#ffffff",
-                scale: 2 // 提高解析度
+                scale: 1.5, // 適中的解析度，不會讓檔案太大但字體清晰
+                logging: false,
+                useCORS: true
             });
-            
             const imgUrl = canvas.toDataURL("image/png");
             container.innerHTML = `<img src="${imgUrl}" alt="訂單明細">`;
             window.scrollTo(0, document.body.scrollHeight);
-        } catch (e) {
-            container.innerHTML = "圖片生成失敗，請再試一次。";
-        }
+        } catch (e) { container.innerHTML = "生成失敗，請再試一次。"; }
     }
 </script>
 </body>
