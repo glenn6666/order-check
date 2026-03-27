@@ -15,9 +15,10 @@
             --bg-color: #f0f4f8;
             --gold-color: #ffab00;
         }
-        body { font-family: "Microsoft JhengHei", sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
+        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
         h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; font-weight: bold; }
         
+        /* 搜尋區 */
         .search-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .search-box { display: flex; gap: 10px; }
         input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
@@ -25,15 +26,16 @@
 
         .warning-text { color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 10px; background-color: #fff3e0; border-radius: 8px; font-weight: bold; }
 
-        /* 商品卡片基礎排版 */
+        /* 卡片樣式 */
         .card { background: white; padding: 18px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; border-left: 6px solid transparent; }
         .item-with-img { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .item-text-part { flex: 1; }
-        .product-img { width: 70px; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
+        .product-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; background: #f9f9f9; }
 
-        /* 字體放大樣式 */
         .item-name { font-size: 1.4em; font-weight: bold; color: #111; margin-bottom: 5px; }
         .item-info-large { font-size: 1.15em; color: #444; font-weight: bold; }
+        
+        /* 金額至右顯示「元」 */
         .price-right { font-size: 1.8em; font-weight: 900; color: var(--primary-blue); min-width: 100px; text-align: right; }
 
         .status-badge { font-size: 0.8em; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 10px; font-weight: bold; color: white; }
@@ -49,8 +51,8 @@
         .total-container { margin-top: 30px; background: #263238; color: white; border-radius: 15px; padding: 25px; }
         .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #455a64; }
         .arrived-total-val { font-size: 1.7em; color: var(--gold-color); font-weight: 900; }
+        
         .print-btn { width: 100%; margin: 20px 0; padding: 15px; background-color: #455a64; color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-
         .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; }
         .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; }
 
@@ -83,6 +85,7 @@
 </div>
 
 <div id="captureArea"></div>
+
 <div id="releasedArea"></div>
 
 <script>
@@ -133,11 +136,14 @@
             const note = (row[1] || "").trim();
             const itemName = (row[3] || "").trim();
             const status = (row[0] || "").trim().toUpperCase();
-            const imgUrl = (row[13] || "").trim(); 
+            
+            // 強制檢查 N 欄 (第 14 欄，索引 13)
+            const imgUrl = row[13] ? row[13].trim() : ""; 
 
             if ((note.includes("釋出") || note.includes("多")) && status !== "TRUE" && itemName !== "") {
                 const qty = (row[4] || "").trim();
-                const price = (row[5] || "0");
+                // 處理單價：移除原本可能存在的 $ 並補上 「元」
+                let price = (row[5] || "0").replace(/[$,]/g, '').trim();
                 
                 releasedHtml += `
                     <div class="card" style="border-left-color: var(--released-orange);">
@@ -147,8 +153,8 @@
                                 <div class="item-name">${itemName}</div>
                                 <div class="item-info-large">數量: ${qty}</div>
                             </div>
-                            ${imgUrl ? `<img src="${imgUrl}" class="product-img" onerror="this.style.display='none'">` : ''}
-                            <div class="price-right">$${price}</div>
+                            ${imgUrl && imgUrl.startsWith('http') ? `<img src="${imgUrl}" class="product-img" onerror="this.style.display='none'">` : ''}
+                            <div class="price-right">${price}元</div>
                         </div>
                     </div>`;
                 hasReleased = true;
@@ -212,8 +218,8 @@
                 <div class="card" style="border-left-color: ${isReleased ? 'var(--released-orange)' : (isNot ? 'var(--bg-pending)' : 'var(--bg-success)')};">
                     <div class="status-badge ${isReleased ? 'badge-released' : (isNot ? 'badge-not-arrived' : 'badge-arrived')}">${isReleased ? '好康現貨' : (isNot ? '未到貨' : '未取貨')}</div>
                     <div class="item-name">${itemName}</div>
-                    <div class="item-info-large">單價: $${price.toLocaleString()} | 數量: ${qty}</div>
-                    <div class="price-right" style="position:absolute; right:20px; bottom:15px;">$${subtotal.toLocaleString()}</div>
+                    <div class="item-info-large">單價: ${price.toLocaleString()}元 | 數量: ${qty}</div>
+                    <div class="price-right" style="position:absolute; right:20px; bottom:15px;">${subtotal.toLocaleString()}元</div>
                 </div>`;
 
             if (isNot && !isReleased) {
@@ -224,23 +230,23 @@
                     <div class="img-item-row">
                         <div style="font-size:30px; font-weight:bold;">${itemName}</div>
                         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:5px;">
-                            <div style="font-size:24px;">$${price.toLocaleString()} x ${qty}</div>
-                            <div style="font-size:32px; font-weight:bold;">$${subtotal.toLocaleString()}</div>
+                            <div style="font-size:24px;">${price.toLocaleString()}元 x ${qty}</div>
+                            <div style="font-size:32px; font-weight:bold;">${subtotal.toLocaleString()}元</div>
                         </div>
                     </div>`;
             }
         }
 
-        imgContent += `<div style="border-top:4px solid black; margin-top:20px; padding-top:15px; font-size:36px; font-weight:bold; text-align:right;">已到貨合計：$${stats.arr.t.toLocaleString()}</div>`;
+        imgContent += `<div style="border-top:4px solid black; margin-top:20px; padding-top:15px; font-size:36px; font-weight:bold; text-align:right;">已到貨合計：${stats.arr.t.toLocaleString()}元</div>`;
         document.getElementById('captureArea').innerHTML = imgContent;
 
         const header = `<div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>`;
         const actionBtn = `<button class="print-btn" onclick="generateImage()">🖼️ 生成大字明細圖片</button>`;
         const total = `
             <div class="total-container">
-                <div class="total-row"><div>已到貨合計</div><div class="arrived-total-val">$${stats.arr.t.toLocaleString()}</div></div>
-                <div class="total-row"><div>未到貨合計</div><div class="total-val">$${stats.not.t.toLocaleString()}</div></div>
-                <div class="total-row"><div>應付金額總計</div><div class="total-val">$${(stats.arr.t + stats.not.t).toLocaleString()}</div></div>
+                <div class="total-row"><div>已到貨合計</div><div class="arrived-total-val">${stats.arr.t.toLocaleString()}元</div></div>
+                <div class="total-row"><div>未到貨合計</div><div class="total-val">${stats.not.t.toLocaleString()}元</div></div>
+                <div class="total-row"><div>應付金額總計</div><div class="total-val">${(stats.arr.t + stats.not.t).toLocaleString()}元</div></div>
             </div>`;
 
         document.getElementById('results').innerHTML = header + arrHtml + notHtml + actionBtn + total;
