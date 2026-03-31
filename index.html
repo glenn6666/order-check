@@ -18,15 +18,16 @@
         body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
         h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; font-weight: bold; }
         
-        /* 搜尋區 */
         .search-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .search-box { display: flex; gap: 10px; }
         input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
+        
+        /* 圓角藍色搜尋按鈕 */
         button.search-btn { padding: 12px 25px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
         .warning-text { color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 10px; background-color: #fff3e0; border-radius: 8px; font-weight: bold; }
 
-        /* 卡片樣式 */
+        /* 商品卡片樣式 */
         .card { background: white; padding: 18px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; border-left: 6px solid transparent; }
         .item-with-img { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .item-text-part { flex: 1; }
@@ -34,8 +35,6 @@
 
         .item-name { font-size: 1.4em; font-weight: bold; color: #111; margin-bottom: 5px; }
         .item-info-large { font-size: 1.15em; color: #444; font-weight: bold; }
-        
-        /* 金額至右顯示「元」 */
         .price-right { font-size: 1.8em; font-weight: 900; color: var(--primary-blue); min-width: 100px; text-align: right; }
 
         .status-badge { font-size: 0.8em; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 10px; font-weight: bold; color: white; }
@@ -53,6 +52,8 @@
         .arrived-total-val { font-size: 1.7em; color: var(--gold-color); font-weight: 900; }
         
         .print-btn { width: 100%; margin: 20px 0; padding: 15px; background-color: #455a64; color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        /* 圓角藍色名稱按鈕 */
         .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; }
         .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; }
 
@@ -85,14 +86,15 @@
 </div>
 
 <div id="captureArea"></div>
-
 <div id="releasedArea"></div>
 
 <script>
     const sheetId = '1pjTOojFm4-_rGpGGN9Nv31GCdYMPtSDQkfn8vbyBFLQ';
-    const gid = '1505777704';
-    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-    let allRows = [];
+    const gidArrived = '1505777704';  // 已到貨表單
+    const gidNotArrived = '18759307'; // 未到貨表單 (新增加的)
+    
+    let arrivedRows = [];
+    let notArrivedRows = [];
 
     function parseCSV(text) {
         const rows = []; let currentRow = []; let currentField = ''; let inQuotes = false;
@@ -119,9 +121,13 @@
 
     window.onload = async function() {
         try {
-            const response = await fetch(csvUrl);
-            const csvText = await response.text();
-            allRows = parseCSV(csvText);
+            // 同時抓取兩個表單
+            const [res1, res2] = await Promise.all([
+                fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gidArrived}`),
+                fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gidNotArrived}`)
+            ]);
+            arrivedRows = parseCSV(await res1.text());
+            notArrivedRows = parseCSV(await res2.text());
             showReleasedItems();
         } catch (e) { console.error(e); }
     };
@@ -131,18 +137,16 @@
         let releasedHtml = `<div class="section-header header-released">🎁 團購好康現貨專區</div>`;
         let hasReleased = false;
 
-        for (let i = 1; i < allRows.length; i++) {
-            const row = allRows[i];
+        // 現貨專區從「已到貨表單」抓取
+        for (let i = 1; i < arrivedRows.length; i++) {
+            const row = arrivedRows[i];
             const note = (row[1] || "").trim();
             const itemName = (row[3] || "").trim();
             const status = (row[0] || "").trim().toUpperCase();
-            
-            // 強制檢查 N 欄 (第 14 欄，索引 13)
             const imgUrl = row[13] ? row[13].trim() : ""; 
 
             if ((note.includes("釋出") || note.includes("多")) && status !== "TRUE" && itemName !== "") {
                 const qty = (row[4] || "").trim();
-                // 處理單價：移除原本可能存在的 $ 並補上 「元」
                 let price = (row[5] || "0").replace(/[$,]/g, '').trim();
                 
                 releasedHtml += `
@@ -153,7 +157,7 @@
                                 <div class="item-name">${itemName}</div>
                                 <div class="item-info-large">數量: ${qty}</div>
                             </div>
-                            ${imgUrl && imgUrl.startsWith('http') ? `<img src="${imgUrl}" class="product-img" onerror="this.style.display='none'">` : ''}
+                            ${imgUrl && imgUrl.startsWith('http') ? `<img src="${imgUrl}" class="product-img" crossorigin="anonymous" onerror="this.style.display='none'">` : ''}
                             <div class="price-right">${price}元</div>
                         </div>
                     </div>`;
@@ -167,32 +171,29 @@
     async function searchNames() {
         const query = document.getElementById('nameInput').value.trim().toLowerCase();
         if (!query) return alert('請輸入關鍵字！');
+        
         document.getElementById('selectionArea').innerHTML = ''; 
         document.getElementById('results').innerHTML = '';
         document.getElementById('imageOutput').style.display = 'none';
         
-        try {
-            const matchedNames = new Set();
-            for (let i = 1; i < allRows.length; i++) {
-                const customer = (allRows[i][2] || "").trim();
-                const status = (allRows[i][0] || "").trim().toUpperCase();
-                if (customer.toLowerCase().includes(query) && status !== "TRUE") matchedNames.add(customer);
-            }
+        const matchedNames = new Set();
+        // 從兩個表單搜尋符合的人名
+        arrivedRows.slice(1).forEach(row => { if(row[2].toLowerCase().includes(query) && row[0].toUpperCase() !== "TRUE") matchedNames.add(row[2].trim()); });
+        notArrivedRows.slice(1).forEach(row => { if(row[2].toLowerCase().includes(query) && row[0].toUpperCase() !== "TRUE") matchedNames.add(row[2].trim()); });
 
-            if (matchedNames.size === 0) {
-                document.getElementById('results').innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無待取貨紀錄。</div>`;
-                showReleasedItems();
-            } else if (matchedNames.size === 1) {
-                showDetails(Array.from(matchedNames)[0]);
-            } else {
-                let btnHtml = `<p style="color:#555; margin-bottom:10px;">請選擇您的正確名稱：</p><div class="name-selector">`;
-                matchedNames.forEach(name => {
-                    btnHtml += `<button class="name-btn" onclick="showDetails('${name.replace(/'/g, "\\'")}')">${name}</button>`;
-                });
-                document.getElementById('selectionArea').innerHTML = btnHtml + `</div>`;
-                document.getElementById('releasedArea').innerHTML = '';
-            }
-        } catch (e) { showReleasedItems(); }
+        if (matchedNames.size === 0) {
+            document.getElementById('results').innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無待取貨紀錄。</div>`;
+            showReleasedItems();
+        } else if (matchedNames.size === 1) {
+            showDetails(Array.from(matchedNames)[0]);
+        } else {
+            let btnHtml = `<p style="color:#555; margin-bottom:10px;">請選擇您的正確名稱：</p><div class="name-selector">`;
+            matchedNames.forEach(name => {
+                btnHtml += `<button class="name-btn" onclick="showDetails('${name.replace(/'/g, "\\'")}')">${name}</button>`;
+            });
+            document.getElementById('selectionArea').innerHTML = btnHtml + `</div>`;
+            document.getElementById('releasedArea').innerHTML = '';
+        }
     }
 
     function showDetails(targetName) {
@@ -201,52 +202,71 @@
         let notHtml = `<div class="section-header header-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
         let imgContent = `<div style="font-size:32px; font-weight:bold; border-bottom:3px solid black; padding-bottom:5px;">ID: ${targetName}</div><div style="font-size:24px; margin:10px 0;">已到貨明細</div>`;
 
-        for (let i = 1; i < allRows.length; i++) {
-            const row = allRows[i];
-            const customer = (row[2] || "").trim();
-            if (customer !== targetName || (row[0] || "").trim().toUpperCase() === "TRUE" || !row[3]) continue;
-
-            const note = (row[1] || "").trim();
+        // 處理已到貨商品 (從 arrivedRows 抓)
+        arrivedRows.forEach((row, i) => {
+            if (i === 0 || row[2].trim() !== targetName || row[0].toUpperCase() === "TRUE") return;
             const itemName = row[3].trim();
             const qty = parseInt(row[4]) || 0;
             const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
             const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
-            const isReleased = note.includes("釋出") || note.includes("多");
-            const isNot = note.includes("未到貨");
-            
-            const card = `
-                <div class="card" style="border-left-color: ${isReleased ? 'var(--released-orange)' : (isNot ? 'var(--bg-pending)' : 'var(--bg-success)')};">
-                    <div class="status-badge ${isReleased ? 'badge-released' : (isNot ? 'badge-not-arrived' : 'badge-arrived')}">${isReleased ? '好康現貨' : (isNot ? '未到貨' : '未取貨')}</div>
-                    <div class="item-name">${itemName}</div>
-                    <div class="item-info-large">單價: ${price.toLocaleString()}元 | 數量: ${qty}</div>
-                    <div class="price-right" style="position:absolute; right:20px; bottom:15px;">${subtotal.toLocaleString()}元</div>
-                </div>`;
+            const imgUrl = row[13] ? row[13].trim() : "";
 
-            if (isNot && !isReleased) {
-                notHtml += card; stats.not.t += subtotal;
-            } else {
-                arrHtml += card; stats.arr.t += subtotal;
-                imgContent += `
-                    <div class="img-item-row">
-                        <div style="font-size:30px; font-weight:bold;">${itemName}</div>
-                        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:5px;">
-                            <div style="font-size:24px;">${price.toLocaleString()}元 x ${qty}</div>
-                            <div style="font-size:32px; font-weight:bold;">${subtotal.toLocaleString()}元</div>
+            arrHtml += `
+                <div class="card" style="border-left-color: var(--bg-success);">
+                    <div class="status-badge badge-arrived">已到貨</div>
+                    <div class="item-with-img">
+                        <div class="item-text-part">
+                            <div class="item-name">${itemName}</div>
+                            <div class="item-info-large">數量: ${qty}</div>
                         </div>
-                    </div>`;
-            }
-        }
+                        ${imgUrl && imgUrl.startsWith('http') ? `<img src="${imgUrl}" class="product-img" onerror="this.style.display='none'">` : ''}
+                        <div class="price-right">${subtotal.toLocaleString()}元</div>
+                    </div>
+                </div>`;
+            stats.arr.t += subtotal;
+            imgContent += `
+                <div class="img-item-row">
+                    <div style="font-size:30px; font-weight:bold;">${itemName}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:5px;">
+                        <div style="font-size:24px;">${price.toLocaleString()}元 x ${qty}</div>
+                        <div style="font-size:32px; font-weight:bold;">${subtotal.toLocaleString()}元</div>
+                    </div>
+                </div>`;
+        });
+
+        // 處理未到貨商品 (從 notArrivedRows 抓)
+        notArrivedRows.forEach((row, i) => {
+            if (i === 0 || row[2].trim() !== targetName || row[0].toUpperCase() === "TRUE") return;
+            const itemName = row[3].trim();
+            const qty = parseInt(row[4]) || 0;
+            const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
+            const imgUrl = row[13] ? row[13].trim() : "";
+
+            notHtml += `
+                <div class="card" style="border-left-color: var(--bg-pending);">
+                    <div class="status-badge badge-not-arrived">預購中</div>
+                    <div class="item-with-img">
+                        <div class="item-text-part">
+                            <div class="item-name">${itemName}</div>
+                            <div class="item-info-large">數量: ${qty}</div>
+                        </div>
+                        ${imgUrl && imgUrl.startsWith('http') ? `<img src="${imgUrl}" class="product-img" onerror="this.style.display='none'">` : ''}
+                        <div class="price-right">${subtotal.toLocaleString()}元</div>
+                    </div>
+                </div>`;
+            stats.not.t += subtotal;
+        });
 
         imgContent += `<div style="border-top:4px solid black; margin-top:20px; padding-top:15px; font-size:36px; font-weight:bold; text-align:right;">已到貨合計：${stats.arr.t.toLocaleString()}元</div>`;
         document.getElementById('captureArea').innerHTML = imgContent;
 
-        const header = `<div class="query-id-header"><span>📍</span><span class="query-id-text">查詢 ID : ${targetName}</span></div>`;
-        const actionBtn = `<button class="print-btn" onclick="generateImage()">🖼️ 生成大字明細圖片</button>`;
+        const header = `<div class="query-id-header" style="font-size:1.5em; font-weight:bold; color:var(--primary-blue); background:white; padding:15px; border-radius:10px; margin-bottom:15px; border-left:6px solid var(--primary-blue);">📍 查詢 ID : ${targetName}</div>`;
+        const actionBtn = `<button class="print-btn" onclick="generateImage()">🖼️ 生成大字明細圖片 (僅已到貨)</button>`;
         const total = `
             <div class="total-container">
                 <div class="total-row"><div>已到貨合計</div><div class="arrived-total-val">${stats.arr.t.toLocaleString()}元</div></div>
                 <div class="total-row"><div>未到貨合計</div><div class="total-val">${stats.not.t.toLocaleString()}元</div></div>
-                <div class="total-row"><div>應付金額總計</div><div class="total-val">${(stats.arr.t + stats.not.t).toLocaleString()}元</div></div>
+                <div class="total-row" style="border-top:2px solid #546e7a; padding-top:15px;"><div>應付總計</div><div class="total-val" style="font-size:1.5em;">${(stats.arr.t + stats.not.t).toLocaleString()}元</div></div>
             </div>`;
 
         document.getElementById('results').innerHTML = header + arrHtml + notHtml + actionBtn + total;
