@@ -15,58 +15,151 @@
             --bg-color: #f0f4f8;
             --gold-color: #ffab00;
         }
-        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; padding: 15px; max-width: 800px; margin: auto; background-color: var(--bg-color); color: #333; padding-bottom: 50px; }
-        h2 { color: var(--primary-blue); text-align: center; margin-bottom: 20px; font-weight: bold; }
+        
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: "Microsoft JhengHei", -apple-system, sans-serif; 
+            padding: 15px; 
+            max-width: 800px; 
+            margin: auto; 
+            background-color: var(--bg-color); 
+            color: #333; 
+            padding-bottom: 60px; 
+        }
+        
+        h2 { color: var(--primary-blue); text-align: center; margin-bottom: 15px; font-weight: bold; }
+        
+        /* 📣 公告跑馬燈樣式區 */
+        .marquee-container {
+            background-color: #fff3e0;
+            border: 1px solid #ffe0b2;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            display: none; /* 預設隱藏，有公告才顯示 */
+        }
+        .marquee-title {
+            background: var(--released-orange);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .marquee-content {
+            flex: 1;
+            overflow: hidden;
+        }
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 25s linear infinite;
+            font-weight: bold;
+            color: #d35400;
+            font-size: 0.95em;
+        }
+        /* 跑馬燈動畫 */
+        @keyframes marquee {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
         
         .search-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px; }
         .search-box { display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; }
-        button.search-btn { padding: 12px 25px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-
+        input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: var(--primary-blue); }
+        
+        button.search-btn { padding: 12px 25px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        button.search-btn:active { opacity: 0.9; }
+        
         .warning-text { color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 10px; background-color: #fff3e0; border-radius: 8px; font-weight: bold; }
-
+        
+        /* 彩色卡片樣式 */
         .card { background: white; padding: 18px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: relative; border-left: 6px solid transparent; }
         .item-with-img { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         .item-text-part { flex: 1; }
+        
+        /* 商品縮圖規格 80x80px */
         .product-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; background: #f9f9f9; }
-
-        .item-name { font-size: 1.4em; font-weight: bold; color: #111; margin-bottom: 5px; }
+        
+        /* 品項放大 1.4em, 數量放大 1.15em */
+        .item-name { font-size: 1.4em; font-weight: bold; color: #111; margin-bottom: 5px; word-break: break-all; }
         .item-info-large { font-size: 1.15em; color: #444; font-weight: bold; }
-        .price-right { font-size: 1.8em; font-weight: 900; color: var(--primary-blue); min-width: 100px; text-align: right; }
-
+        
+        /* 金額大字置右 1.8em */
+        .price-right { font-size: 1.8em; font-weight: 900; color: var(--primary-blue); min-width: 110px; text-align: right; white-space: nowrap; }
+        
         .status-badge { font-size: 0.8em; padding: 3px 10px; border-radius: 6px; display: inline-block; margin-bottom: 10px; font-weight: bold; color: white; }
         .badge-released { background-color: var(--released-orange); }
         .badge-arrived { background-color: var(--bg-success); }
         .badge-not-arrived { background-color: var(--bg-pending); }
-
-        .section-header { padding: 10px 15px; border-radius: 8px; font-weight: bold; margin: 25px 0 12px 0; font-size: 1.05em; display: flex; align-items: center; }
+        
+        .section-header { padding: 12px 15px; border-radius: 8px; font-weight: bold; margin: 25px 0 12px 0; font-size: 1.1em; display: flex; align-items: center; }
         .header-released { background-color: #fff3e0; color: var(--released-orange); border-left: 5px solid var(--released-orange); }
         .header-arrived { background-color: #e6f4ea; color: var(--success-green); border-left: 5px solid var(--success-green); }
         .header-not-arrived { background-color: #f1f3f4; color: #5f6368; border-left: 5px solid #5f6368; }
-
-        .total-container { margin-top: 30px; background: #263238; color: white; border-radius: 15px; padding: 25px; }
+        
+        /* 總金額計算區塊 */
+        .total-container { margin-top: 25px; background: #263238; color: white; border-radius: 15px; padding: 22px; }
         .total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #455a64; }
+        .total-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
         .arrived-total-val { font-size: 1.7em; color: var(--gold-color); font-weight: 900; }
+        .total-val { font-size: 1.4em; font-weight: bold; }
         
-        .print-btn { width: 100%; margin: 20px 0; padding: 15px; background-color: #455a64; color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .print-btn { width: 100%; margin: 20px 0; padding: 15px; background-color: #37474f; color: white; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .print-btn:active { background-color: #263238; }
         
+        /* 多重人名選擇鈕 */
         .name-selector { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e8f0fe; border-radius: 10px; }
-        .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; }
-
-        #captureArea { position: absolute; left: -9999px; width: 600px; background: white; color: black; padding: 20px; font-family: "新細明體", serif; }
-        .img-item-row { border-bottom: 2px dashed black; padding: 15px 0; }
-        #imageOutput { text-align: center; margin-top: 20px; border: 2px dashed #ccc; padding: 10px; background: #fff; display: none; }
-        #imageOutput img { width: 100%; border: 1px solid #000; }
-        .released-warning { text-align: center; color: #d35400; font-size: 1em; margin-top: 15px; font-weight: bold; padding: 12px; border: 1px dashed #e67e22; border-radius: 10px; background: #fff; }
+        .name-btn { padding: 12px 22px; background: white; border: 2px solid var(--primary-blue); border-radius: 30px; color: var(--primary-blue); cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .name-btn:hover, .name-btn:active { background: var(--primary-blue); color: white; }
+        
+        /* 🖼️ 24px-32px 純白底黑字新細明體熱感應紙長圖生成區 (防止截斷優化版) */
+        #captureArea { 
+            position: absolute; 
+            top: 0;
+            left: 0;
+            margin-top: -99999px; /* 使用大幅度負邊距移出可見區 */
+            width: 500px; 
+            background: #ffffff; 
+            color: #000000; 
+            padding: 30px 25px; 
+            font-family: "新細明體", "PMingLiU", serif; 
+        }
+        .img-item-row { border-bottom: 3px dashed #000000; padding: 20px 0; }
+        .img-item-row:last-of-type { border-bottom: 4px solid #000000; }
+        
+        #imageOutput { text-align: center; margin-top: 20px; border: 2px dashed #b0bec5; padding: 15px; background: #fff; display: none; border-radius: 12px; }
+        #imageOutput img { width: 100%; max-width: 500px; border: 1px solid #000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        .released-warning { text-align: center; color: #d35400; font-size: 1em; margin-top: 15px; font-weight: bold; padding: 12px; border: 1px dashed #e67e22; border-radius: 10px; background: #fff; line-height: 1.5; }
     </style>
 </head>
 <body>
 
 <h2>安星水產泰山店訂單查詢系統</h2>
 
+<div class="marquee-container" id="announcementBar">
+    <div class="marquee-title">📢 店家公告</div>
+    <div class="marquee-content">
+        <div class="marquee-text" id="announcementText"></div>
+    </div>
+</div>
+
 <div class="search-container">
     <div class="search-box">
-        <input type="text" id="nameInput" placeholder="輸入名字關鍵字">
+        <input type="text" id="nameInput" placeholder="請輸入您的名字關鍵字 (例如: 小明)">
         <button class="search-btn" onclick="searchNames()">搜尋</button>
     </div>
 </div>
@@ -77,7 +170,7 @@
 <div id="results"></div>
 
 <div id="imageOutput">
-    <div style="color:#d32f2f; font-weight:bold; margin-bottom:10px;">▼ 下方圖片已生成，請長按儲存或分享 ▼</div>
+    <div style="color:#d32f2f; font-weight:bold; margin-bottom:12px; font-size: 1.05em;">▼ 下方圖片已生成，請長按儲存或分享 ▼</div>
     <div id="imageContainer"></div>
 </div>
 
@@ -85,13 +178,15 @@
 <div id="releasedArea"></div>
 
 <script>
+    // 試算表設定
     const sheetId = '1pjTOojFm4-_rGpGGN9Nv31GCdYMPtSDQkfn8vbyBFLQ';
-    const gidArrived = '1505777704';  
+    const gidArrived = '1505777704';   
     const gidNotArrived = '1460314999'; 
     
     let arrivedRows = [];
     let notArrivedRows = [];
 
+    // 通用強度 CSV 解析器
     function parseCSV(text) {
         const rows = []; let currentRow = []; let currentField = ''; let inQuotes = false;
         for (let i = 0; i < text.length; i++) {
@@ -115,6 +210,7 @@
         return rows;
     }
 
+    // 初始化載入雙表單
     window.onload = async function() {
         try {
             const [res1, res2] = await Promise.all([
@@ -123,36 +219,79 @@
             ]);
             arrivedRows = parseCSV(await res1.text());
             notArrivedRows = parseCSV(await res2.text());
+            
+            // 優先處理並檢查公告
+            checkAnnouncements();
+            // 渲染現貨區
             showReleasedItems();
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error(e); 
+            alert('資料載入失敗，請檢查網路連線或通知店員！');
+        }
     };
 
+    // 📣 檢查並串接 B 欄為「公告」的 D 欄文字
+    function checkAnnouncements() {
+        const announcements = [];
+        
+        // 掃描 來源A (已到貨表單)
+        for (let i = 1; i < arrivedRows.length; i++) {
+            const row = arrivedRows[i];
+            if (!row || row.length < 4) continue;
+            
+            const note = (row[1] || "").trim();      // B欄 = 備註
+            const content = (row[3] || "").trim();   // D欄 = 品項資訊
+            
+            if (note === "公告" && content !== "") {
+                announcements.push(content);
+            }
+        }
+        
+        const bar = document.getElementById('announcementBar');
+        const textContainer = document.getElementById('announcementText');
+        
+        if (announcements.length > 0) {
+            // 用空格和間隔號把多條公告串在一起
+            textContainer.innerText = announcements.join('    ★    ') + '    ★    ';
+            bar.style.display = 'flex'; // 顯示跑馬燈
+        } else {
+            bar.style.display = 'none'; // 無公告時隱藏
+        }
+    }
+
+    // 渲染「🎁 團購好康現貨專區」
     function showReleasedItems() {
         const releasedArea = document.getElementById('releasedArea');
-        let releasedHtml = `<div class="section-header header-released">🎁 團購好康現貨專區</div>`;
+        let releasedHtml = `<div class="section-header header-released">🎁 團購好康現貨專區 (現貨免等待)</div>`;
         let hasReleased = false;
 
         for (let i = 1; i < arrivedRows.length; i++) {
             const row = arrivedRows[i];
+            if (!row || row.length < 6) continue;
+
+            const status = (row[0] || "").trim().toUpperCase();
             const note = (row[1] || "").trim();
             const itemName = (row[3] || "").trim();
-            const status = (row[0] || "").trim().toUpperCase();
+            const qty = (row[4] || "").trim();
+            let price = (row[5] || "0").replace(/[$,\s]/g, '').trim();
             const imgUrl = row[13] ? row[13].trim() : ""; 
 
+            // 排除單純作為「公告」的列
+            if (note === "公告") continue;
+
             if ((note.includes("釋出") || note.includes("多")) && status !== "TRUE" && itemName !== "") {
-                const qty = (row[4] || "").trim();
-                let price = (row[5] || "0").replace(/[$,]/g, '').trim();
-                
+                const formattedPrice = parseInt(price) ? parseInt(price).toLocaleString() : price;
+
                 releasedHtml += `
                     <div class="card" style="border-left-color: var(--released-orange);">
                         <div class="status-badge badge-released">好康現貨</div>
                         <div class="item-with-img">
                             <div class="item-text-part">
                                 <div class="item-name">${itemName}</div>
-                                <div class="item-info-large">數量: ${qty}</div>
+                                <div class="item-info-large">釋出數量: ${qty}</div>
                             </div>
                             ${imgUrl && imgUrl.startsWith('http') ? `<img src="${imgUrl}" class="product-img" crossorigin="anonymous" onerror="this.style.display='none'">` : ''}
-                            <div class="price-right">${price}元</div>
+                            <div class="price-right">${formattedPrice}元</div>
                         </div>
                     </div>`;
                 hasReleased = true;
@@ -162,49 +301,68 @@
         releasedArea.innerHTML = hasReleased ? (releasedHtml + warning) : '';
     }
 
+    // 模糊搜尋雙表單名字
     async function searchNames() {
         const query = document.getElementById('nameInput').value.trim().toLowerCase();
-        if (!query) return alert('請輸入關鍵字！');
-        
+        if (!query) return alert('請輸入顧客名字關鍵字！');
+
         document.getElementById('selectionArea').innerHTML = ''; 
         document.getElementById('results').innerHTML = '';
         document.getElementById('imageOutput').style.display = 'none';
-        
+
         const matchedNames = new Set();
+
         arrivedRows.slice(1).forEach(row => { 
-            if(row[2] && row[2].toLowerCase().includes(query) && row[0].toUpperCase() !== "TRUE") matchedNames.add(row[2].trim()); 
+            // 搜尋時同樣排除公告列
+            if (row[1] && row[1].trim() === "公告") return;
+            if (row[2] && row[2].toLowerCase().includes(query) && row[0].toUpperCase() !== "TRUE") matchedNames.add(row[2].trim()); 
         });
         notArrivedRows.slice(1).forEach(row => { 
-            if(row[2] && row[2].toLowerCase().includes(query) && row[0].toUpperCase() !== "TRUE") matchedNames.add(row[2].trim()); 
+            if (row[2] && row[2].toLowerCase().includes(query) && row[0].toUpperCase() !== "TRUE") matchedNames.add(row[2].trim()); 
         });
 
         if (matchedNames.size === 0) {
-            document.getElementById('results').innerHTML = `<div style="text-align:center; padding:40px; color:#777;">查無待取貨紀錄。</div>`;
+            document.getElementById('results').innerHTML = `<div style="text-align:center; padding:40px; color:#777; font-weight:bold;">查無您的待取貨紀錄。</div>`;
             showReleasedItems();
         } else if (matchedNames.size === 1) {
             showDetails(Array.from(matchedNames)[0]);
         } else {
-            let btnHtml = `<p style="color:#555; margin-bottom:10px;">請選擇您的正確名稱：</p><div class="name-selector">`;
+            let btnHtml = `<p style="color:#e67e22; font-weight:bold; margin-bottom:12px; font-size:1.05em;">📍 系統找到多個相符名字，請點選正確的名稱：</p><div class="name-selector">`;
             matchedNames.forEach(name => {
                 btnHtml += `<button class="name-btn" onclick="showDetails('${name.replace(/'/g, "\\'")}')">${name}</button>`;
             });
             document.getElementById('selectionArea').innerHTML = btnHtml + `</div>`;
-            document.getElementById('releasedArea').innerHTML = '';
+            document.getElementById('releasedArea').innerHTML = ''; 
         }
     }
 
+    // 渲染詳細購物明細
     function showDetails(targetName) {
+        document.getElementById('selectionArea').innerHTML = ''; 
+        
         let stats = { arr: { t: 0 }, not: { t: 0 } };
-        let arrHtml = `<div class="section-header header-arrived">✅ 已到貨商品 (待處理)</div>`;
-        let notHtml = `<div class="section-header header-not-arrived">⏳ 未到貨商品 (待通知)</div>`;
-        let imgContent = `<div style="font-size:32px; font-weight:bold; border-bottom:3px solid black; padding-bottom:5px;">ID: ${targetName}</div><div style="font-size:24px; margin:10px 0;">已到貨明細</div>`;
+        let arrHtml = `<div class="section-header header-arrived">✅ 已到貨商品 (請儘速至門市取貨)</div>`;
+        let notHtml = `<div class="section-header header-not-arrived">⏳ 未到貨商品 (到貨後另行通知)</div>`;
+        
+        let imgContent = `
+            <div style="font-size:32px; font-weight:bold; border-bottom:4px solid #000000; padding-bottom:10px; font-family:'新細明體', serif;">ID: ${targetName}</div>
+            <div style="font-size:26px; font-weight:bold; margin:15px 0 5px 0; font-family:'新細明體', serif;">【已到貨現場對帳單】</div>
+        `;
+        
+        let hasArr = false;
+        let hasNot = false;
 
+        // 已到貨
         arrivedRows.forEach((row, i) => {
             if (i === 0 || !row[2] || row[2].trim() !== targetName || row[0].toUpperCase() === "TRUE") return;
+            if (row[1] && row[1].trim() === "公告") return; // 排除公告
+
             const itemName = row[3].trim();
+            if(!itemName) return;
+            
             const qty = parseInt(row[4]) || 0;
-            const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
-            const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
+            const price = parseInt((row[5] || "0").replace(/[$,\s]/g, '')) || 0;
+            const subtotal = parseInt((row[12] || "0").replace(/[$,\s]/g, '')) || 0;
             const imgUrl = row[13] ? row[13].trim() : "";
 
             arrHtml += `
@@ -213,29 +371,36 @@
                     <div class="item-with-img">
                         <div class="item-text-part">
                             <div class="item-name">${itemName}</div>
-                            <div class="item-info-large">數量: ${qty}</div>
+                            <div class="item-info-large">數量: ${qty}  (單價: ${price.toLocaleString()}元)</div>
                         </div>
                         ${imgUrl && imgUrl.startsWith('http') ? `<img src="${imgUrl}" class="product-img" onerror="this.style.display='none'">` : ''}
                         <div class="price-right">${subtotal.toLocaleString()}元</div>
                     </div>
                 </div>`;
+            
             stats.arr.t += subtotal;
+            hasArr = true;
+
             imgContent += `
-                <div class="img-item-row">
-                    <div style="font-size:30px; font-weight:bold;">${itemName}</div>
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:5px;">
-                        <div style="font-size:24px;">${price.toLocaleString()}元 x ${qty}</div>
-                        <div style="font-size:32px; font-weight:bold;">${subtotal.toLocaleString()}元</div>
+                <div class="img-item-row" style="font-family:'新細明體', serif;">
+                    <div style="font-size:30px; font-weight:bold; line-height:1.3; color:#000000;">${itemName}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:8px;">
+                        <div style="font-size:26px; color:#000000;">${price.toLocaleString()}元 x ${qty}</div>
+                        <div style="font-size:34px; font-weight:bold; color:#000000;">${subtotal.toLocaleString()}元</div>
                     </div>
                 </div>`;
         });
 
+        if(!hasArr) arrHtml += `<div style="padding:20px; background:white; border-radius:10px; color:#999; text-align:center;">目前無已到貨商品</div>`;
+
+        // 未到貨
         notArrivedRows.forEach((row, i) => {
             if (i === 0 || !row[2] || row[2].trim() !== targetName || row[0].toUpperCase() === "TRUE") return;
             const itemName = row[3].trim();
+            if(!itemName) return;
+
             const qty = parseInt(row[4]) || 0;
-            const price = parseInt((row[5] || "0").replace(/[$,]/g, '')) || 0;
-            const subtotal = parseInt((row[12] || "0").replace(/[$,]/g, '')) || 0;
+            const subtotal = parseInt((row[12] || "0").replace(/[$,\s]/g, '')) || 0;
             const imgUrl = row[13] ? row[13].trim() : "";
 
             notHtml += `
@@ -244,44 +409,70 @@
                     <div class="item-with-img">
                         <div class="item-text-part">
                             <div class="item-name">${itemName}</div>
-                            <div class="item-info-large">數量: ${qty}</div>
+                            <div class="item-info-large">預購數量: ${qty}</div>
                         </div>
                         ${imgUrl && imgUrl.startsWith('http') ? `<img src="${imgUrl}" class="product-img" onerror="this.style.display='none'">` : ''}
                         <div class="price-right">${subtotal.toLocaleString()}元</div>
                     </div>
                 </div>`;
+            
             stats.not.t += subtotal;
+            hasNot = true;
         });
 
-        imgContent += `<div style="border-top:4px solid black; margin-top:20px; padding-top:15px; font-size:36px; font-weight:bold; text-align:right;">已到貨合計：${stats.arr.t.toLocaleString()}元</div>`;
+        if(!hasNot) notHtml += `<div style="padding:20px; background:white; border-radius:10px; color:#999; text-align:center;">目前無未到貨預購品項</div>`;
+
+        imgContent += `
+            <div style="margin-top:25px; padding-top:15px; font-size:36px; font-weight:bold; text-align:right; font-family:'新細明體', serif; color:#000000;">
+                應付總金額：${stats.arr.t.toLocaleString()} 元
+            </div>
+            <div style="text-align:center; margin-top:35px; font-size:22px; color:#555; font-family:'新細明體', serif;">謝謝惠顧，歡迎再次光臨！</div>
+        `;
+        
         document.getElementById('captureArea').innerHTML = imgContent;
 
-        const header = `<div class="query-id-header" style="font-size:1.5em; font-weight:bold; color:var(--primary-blue); background:white; padding:15px; border-radius:10px; margin-bottom:15px; border-left:6px solid var(--primary-blue);">📍 查詢 ID : ${targetName}</div>`;
-        const actionBtn = `<button class="print-btn" onclick="generateImage()">🖼️ 生成大字明細圖片 (僅已到貨)</button>`;
-        const total = `
+        const header = `<div class="query-id-header" style="font-size:1.4em; font-weight:bold; color:var(--primary-blue); background:white; padding:15px; border-radius:10px; margin-bottom:15px; border-left:6px solid var(--primary-blue);">📍 查詢顧客 ID : ${targetName}</div>`;
+        const actionBtn = `<button class="print-btn" onclick="generateImage()">🖼️ 生成大字明細圖片 (現場取貨對帳用)</button>`;
+        
+        const totalSection = `
             <div class="total-container">
-                <div class="total-row"><div>已到貨合計</div><div class="arrived-total-val">${stats.arr.t.toLocaleString()}元</div></div>
-                <div class="total-row"><div>未到貨合計</div><div class="total-val">${stats.not.t.toLocaleString()}元</div></div>
-                <div class="total-row" style="border-top:2px solid #546e7a; padding-top:15px;"><div>應付總計</div><div class="total-val" style="font-size:1.5em;">${(stats.arr.t + stats.not.t).toLocaleString()}元</div></div>
+                <div class="total-row"><div>已到貨合計 (本日需付)</div><div class="arrived-total-val">${stats.arr.t.toLocaleString()}元</div></div>
+                <div class="total-row"><div>未到貨合計 (預購商品)</div><div class="total-val">${stats.not.t.toLocaleString()}元</div></div>
+                <div class="total-row" style="border-top:2px dashed #546e7a; padding-top:15px; margin-top:5px;">
+                    <div>訂單應付總計</div>
+                    <div class="total-val" style="font-size:1.6em; color:#fff;">${(stats.arr.t + stats.not.t).toLocaleString()}元</div>
+                </div>
             </div>`;
-
-        document.getElementById('results').innerHTML = header + arrHtml + notHtml + actionBtn + total;
-        document.getElementById('releasedArea').innerHTML = '';
+            
+        document.getElementById('results').innerHTML = header + arrHtml + notHtml + actionBtn + totalSection;
+        document.getElementById('releasedArea').innerHTML = ''; 
     }
 
+    // 轉換一鍵生成大字圖片功能
     async function generateImage() {
         const area = document.getElementById('captureArea');
         const output = document.getElementById('imageOutput');
         const container = document.getElementById('imageContainer');
-        container.innerHTML = "正在生成圖片中...";
+        
+        container.innerHTML = "<div style='padding:20px; font-weight:bold; color:#555;'>⏳ 大字明細製圖中，請稍候...</div>";
         output.style.display = 'block';
-        window.scrollTo(0, document.body.scrollHeight);
+        output.scrollIntoView({ behavior: 'smooth' });
+
         try {
-            const canvas = await html2canvas(area, { backgroundColor: "#ffffff", scale: 1 });
+            const canvas = await html2canvas(area, { 
+                backgroundColor: "#ffffff", 
+                scale: 2, 
+                logging: false,
+                useCORS: true 
+            });
+            
             const imgUrl = canvas.toDataURL("image/png");
-            container.innerHTML = `<img src="${imgUrl}" alt="訂單明細">`;
-            window.scrollTo(0, document.body.scrollHeight);
-        } catch (e) { container.innerHTML = "生成失敗，請再試一次。"; }
+            container.innerHTML = `<img src="${imgUrl}" alt="安星水產已到貨明細">`;
+            output.scrollIntoView({ behavior: 'smooth' });
+        } catch (e) { 
+            console.error(e);
+            container.innerHTML = "<div style='color:red; padding:10px;'>圖片產生失敗，請再試一次。</div>"; 
+        }
     }
 </script>
 </body>
