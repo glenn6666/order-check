@@ -38,7 +38,7 @@
         button.search-btn { padding: 12px 25px; background-color: var(--primary-blue); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; }
         button.search-btn:active { opacity: 0.9; }
         
-        /* 原本的警示文字樣式（保持不變） */
+        /* 原本的警示文字樣式 */
         .warning-text { color: #e67e22; font-size: 0.85em; text-align: center; margin-bottom: 20px; padding: 10px; background-color: #fff3e0; border-radius: 8px; font-weight: bold; }
         
         /* 📣 獨立公告外層容器 */
@@ -47,7 +47,7 @@
             margin-bottom: 25px;
             display: flex;
             flex-direction: column;
-            gap: 12px; /* 每條獨立跑馬燈之間的間隔 */
+            gap: 12px; 
         }
 
         /* 📣 單一公告跑馬燈樣式區 */
@@ -82,7 +82,8 @@
         .marquee-text {
             display: inline-block;
             padding-left: 100%;
-            animation: marquee 25s linear infinite;
+            /* ⚡ 速度優化：由 25s 縮短至 15s，速度稍微變快更流暢 */
+            animation: marquee 15s linear infinite;
             font-weight: 900;       
             color: #d32f2f;          
             font-size: 1.15em;       
@@ -228,10 +229,9 @@
         }
     };
 
-    // 📣 修改：將每條公告渲染成獨立的跑馬燈
     function checkAnnouncements() {
         const groupContainer = document.getElementById('announcementGroup');
-        groupContainer.innerHTML = ''; // 清空舊內容
+        groupContainer.innerHTML = ''; 
         
         let marqueeHtml = '';
 
@@ -242,7 +242,6 @@
             const note = (row[1] || "").trim();      
             const content = (row[3] || "").trim();   
             
-            // 只要備註是「公告」，且內容不為空，就建立一個獨立跑馬燈
             if (note === "公告" && content !== "") {
                 marqueeHtml += `
                     <div class="marquee-container">
@@ -254,7 +253,6 @@
             }
         }
         
-        // 將產生出來的所有獨立跑馬燈塞進網頁
         groupContainer.innerHTML = marqueeHtml;
     }
 
